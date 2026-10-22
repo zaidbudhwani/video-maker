@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Videos · Video Maker</title>
+<meta name="theme-color" content="#2c76ae">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f7fb; --bg2: #e7eff7; --card: #ffffff; --ink: #1f1f1f; --muted: #54595f; --line: #dbe5ee;
+    --accent: #2c76ae; --accent-ink: #fff; --accent-soft: #e3f0fa; --warn: #8a5300; --warn-soft: #fbf0dc;
+    --bad: #a3281f; --bad-soft: #fbe7e4; --shadow: 0 1px 2px rgba(20,50,80,.05), 0 8px 24px rgba(20,50,80,.07);
+    --serif: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1620; --bg2: #131d29; --card: #172230; --ink: #e9eff5; --muted: #9fb0c0; --line: #2a3a4b;
+      --accent: #6caedf; --accent-ink: #0b1a28; --accent-soft: #1c2f42; --warn: #e8b86a; --warn-soft: #362c1b;
+      --bad: #f08a80; --bad-soft: #3a2220; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; color: var(--ink); font: 15px/1.5 var(--sans); background: var(--bg); }
+  main { max-width: 760px; margin: 0 auto; padding: 16px 16px 64px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  h1 { font: 650 28px/1.2 var(--serif); margin: 0; }
+  .who { font-size: 13px; color: var(--muted); }
+  .who a { color: inherit; }
+  .btn { display: inline-block; text-decoration: none; font: 600 15px var(--sans); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; text-align: center; }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+  .btn.quiet { background: transparent; color: var(--muted); border: 0; text-decoration: underline; font-weight: 500; padding: 8px 6px; }
+  .btn.small { padding: 7px 11px; font-size: 14px; border-radius: 10px; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow); margin-bottom: 14px; }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 10px; }
+  .week { font-size: 15px; }
+  .week b { font-weight: 600; }
+  .free { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+  .free span { font-size: 13px; color: var(--muted); }
+  details.fold { background: var(--card); border: 1px solid var(--line); border-radius: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  details.fold > summary { cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::after { content: "+"; color: var(--muted); font-size: 20px; line-height: 1; }
+  details.fold[open] > summary::after { content: "–"; }
+  details.fold .inner { padding: 0 16px 16px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .stat b { display: block; font: 650 22px/1.1 var(--serif); }
+  .stat span { font-size: 13px; color: var(--muted); }
+  .weeks { display: flex; align-items: flex-end; gap: 6px; height: 90px; }
+  .wk { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; min-width: 0; }
+  .wk i { display: block; width: 100%; max-width: 44px; background: var(--accent); border-radius: 6px 6px 2px 2px; min-height: 2px; }
+  .wk i.low { opacity: .45; }
+  .wk small { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .wk em { font-style: normal; font-size: 12px; font-weight: 600; }
+  .tools { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+  .tools input, .tools select, .form input, .form select, .timepick { font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; max-width: 100%; }
+  .timepick { padding: 5px 8px; }
+  .tools input { flex: 1; min-width: 160px; }
+  .list { display: grid; gap: 10px; }
+  .row { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
+  .row.older { margin-left: 18px; background: var(--bg2); }
+  .main { display: grid; grid-template-columns: 56px 1fr; gap: 12px; }
+  .thumb { width: 56px; height: 100px; border-radius: 8px; background: var(--bg2); object-fit: cover; display: block; }
+  .title { font-weight: 600; font-size: 16px; margin: 0 0 2px; overflow-wrap: anywhere; }
+  .meta { font-size: 13px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip { font-size: 12px; border-radius: 99px; padding: 2px 9px; background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); } .chip.bad { background: var(--bad-soft); color: var(--bad); }
+  .chip.plain { background: var(--bg2); color: var(--muted); }
+  .chip.posted { background: var(--accent); color: var(--accent-ink); }
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .acts .btn { flex: 1 1 auto; min-width: 110px; padding: 9px 12px; font-size: 14px; }
+  .acts .quiet { flex: 0 0 auto; min-width: 0; }
+  .form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .form label { font-size: 13px; color: var(--muted); }
+  .empty { text-align: center; padding: 40px 16px; color: var(--muted); }
+  .empty a { color: var(--accent); font-weight: 600; display: inline-block; padding: 12px 2px; }   /* readable in dark mode and easy to tap */
+  .note { font-size: 13px; color: var(--muted); margin-top: 18px; text-align: center; }
+  .toggle { background: none; border: 0; color: var(--muted); text-decoration: underline; font: 500 14px var(--sans); cursor: pointer; padding: 6px 2px; }
+  .msg { font-size: 14px; margin-top: 8px; min-height: 1.3em; }
+  .msg.bad { color: var(--bad); } .msg.good { color: var(--accent); }
+  .acct label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+  .acct input { width: 100%; font: inherit; color: var(--ink); background: transparent; border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; }
+  .acct input:focus { outline: none; border-color: var(--accent); }
+  .pw { position: relative; }
+  .pw input { padding-right: 56px; }
+  .peek { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; margin: 0; padding: 0;
+          display: grid; place-items: center; background: transparent; color: var(--muted); border: 0; border-radius: 8px;
+          cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .peek:hover, .peek.held { color: var(--ink); background: rgba(127,127,127,.15); }
+  .acct .sep { border-top: 1px solid var(--line); margin: 18px 0 4px; }
+  /* easy to hit with a thumb: every tap target is at least 44 px */
+  .btn, .acts .btn, .btn.small, .toggle, .timepick { min-height: 44px; }
+  .btn.quiet, .toggle { padding: 12px 10px; }
+  .acts .btn[data-del] { margin-left: 14px; }
+  .who a { display: inline-block; padding: 12px 6px; }
+  .tools input, .tools select { min-height: 44px; }
+  .hidden { display: none !important; }
+  /* shared top bar (same as the start page): New video, My videos, and an account menu */
+  .nav { display: flex; align-items: center; gap: 2px; min-height: 52px; max-width: 760px; margin: 0 auto; padding: 4px 8px 0; position: relative; }
+  .nav .grow { flex: 1; }
+  .nav a, .nav .navbtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: none;
+                          color: var(--ink); font: 600 15px var(--sans); text-decoration: none; cursor: pointer; }
+  .nav a:hover, .nav .navbtn:hover { background: var(--accent-soft); }
+  .nav a.cur { color: var(--accent); background: var(--accent-soft); }
+  .menu { position: absolute; right: 8px; top: 52px; z-index: 5; min-width: 170px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 4px; }
+  .menu a, .menu button { display: flex; width: 100%; min-height: 44px; align-items: center; border-radius: 8px; }
+  .navuser { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hidden { display: none !important; }
+
+  /* Top bar: one floating pill on every page (after Navbar Gallery: Supaste's floating capsule, IntegratedBio's grouped links) */
+  .nav { position: sticky; top: 8px; z-index: 30; max-width: 760px; margin: 8px auto 4px; padding: 5px; min-height: 58px; gap: 6px;
+         background: var(--card); background: color-mix(in srgb, var(--card) 86%, transparent);
+         -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+         border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 8px 28px rgba(20, 45, 75, .08); }
+  @media (max-width: 800px) { .nav { margin: 8px 12px 4px; } }
+  .nav .logo { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%;
+               background: var(--accent); color: var(--accent-ink); }
+  .nav .logo:hover { background: var(--accent); filter: brightness(1.08); }
+  .nav .seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 999px; background: var(--accent-soft); }
+  .nav .seg a { border-radius: 999px; padding: 0 16px; white-space: nowrap; }
+  .nav .seg a:hover { background: transparent; color: var(--accent); }
+  .nav .seg a.cur { background: var(--card); color: var(--accent); box-shadow: 0 1px 4px rgba(20, 45, 75, .14); }
+  .nav .navbtn { border-radius: 999px; }
+  .menu { top: 62px; border-radius: 16px; }
+  @media (max-width: 420px) { .nav .seg a { padding: 0 11px; font-size: 14px; } .navuser { max-width: 64px; } }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+<link rel="stylesheet" href="/static/lenis.css">
+<script defer src="/static/gsap.min.js"></script>
+<script defer src="/static/lenis.min.js"></script>
+<script defer src="/static/motion.js"></script>
+</head>
+<body>
+<nav class="nav" id="nav" aria-label="Main">
+  <a href="/" class="logo" aria-label="Alex's Video Maker: make a new video"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2.5"/><path d="M16 10l5-3v10l-5-3z"/></svg></a>
+  <span class="seg"><a href="/" id="navNew">Make a video</a><a href="/videos" id="navVideos" class="cur" aria-current="page">My videos</a></span>
+  <span class="grow"></span>
+  <span id="acct" class="hidden">
+    <button class="navbtn" id="acctBtn" aria-haspopup="true" aria-expanded="false"><span class="navuser" id="navUser"></span>&nbsp;&#9662;</button>
+    <div class="menu hidden" id="acctMenu"><a href="/admin" id="adminLink" class="hidden">Team page</a><button class="navbtn" id="navSignout">Sign out</button></div>
+  </span>
+</nav>
+<main>
+  <div class="top">
+    <div><h1>My videos</h1><div class="who" id="who"></div></div>
+    <a class="btn" href="/">+ Make a video</a>
+  </div>
+  <div id="sceneSlot" data-scene3d="week" aria-hidden="true"></div>
+
+  <div class="card week hidden" id="weekCard">
+    <div class="label">This week</div>
+    <div id="weekText"></div>
+    <div class="free" id="free"></div>
+  </div>
+
+  <div class="tools hidden" id="tools">
+    <input id="q" type="search" placeholder="Search your videos" aria-label="Search your videos">
+    <select id="sort" aria-label="Order">
+      <option value="new">Newest first</option><option value="old">Oldest first</option><option value="long">Longest first</option>
+    </select>
+  </div>
+  <div class="tools hidden" id="adminTools">
+    <select id="owner" aria-label="Whose videos"></select>
+  </div>
+
+  <div class="list" id="list"><div class="empty">Loading…</div></div>
+  <div><button class="toggle hidden" id="older" type="button">Show earlier versions</button></div>
+
+  <details class="fold" id="numbersFold" style="margin-top:18px">
+    <summary>Your numbers</summary>
+    <div class="inner">
+      <div class="stats">
+        <div class="stat"><b id="sTotal">–</b><span>videos made</span></div>
+        <div class="stat"><b id="sWeek">–</b><span>made this week</span></div>
+        <div class="stat"><b id="sMinutes">–</b><span id="sMinutesLabel">minutes of video</span></div>
+        <div class="stat admin-only hidden"><b id="sBuild">–</b><span>average build time</span></div>
+        <div class="stat admin-only hidden"><b id="sRemakes">–</b><span>remakes from feedback</span></div>
+        <div class="stat hidden" id="saved"><b id="sSaved">–</b><span>hours of hand-editing you estimated</span></div>
+      </div>
+      <div id="weeksBox"><div class="label">Videos made per week, last 8 weeks</div>
+      <div class="weeks" id="weeks"></div></div>
+    </div>
+  </details>
+
+  <details class="fold acct" id="acct">
+    <summary>Account</summary>
+    <div class="inner">
+      <form id="pwForm" autocomplete="on">
+        <div class="label">Change my password</div>
+        <label for="pwOld">Current password</label>
+        <div class="pw"><input id="pwOld" type="password" autocomplete="current-password" required><button type="button" class="peek" data-for="pwOld" title="Hold to see the password" aria-label="Hold to see the password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <label for="pwNew">New password (at least 8 characters)</label>
+        <div class="pw"><input id="pwNew" type="password" autocomplete="new-password" minlength="8" required><button type="button" class="peek" data-for="pwNew" title="Hold to see the password" aria-label="Hold to see the password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <label for="pwNew2">Type the new one again</label>
+        <div class="pw"><input id="pwNew2" type="password" autocomplete="new-password" required><button type="button" class="peek" data-for="pwNew2" title="Hold to see the password" aria-label="Hold to see the password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <div class="msg" id="pwMsg" role="status"></div>
+        <button class="btn" id="pwBtn" style="margin-top:6px">Save my new password</button>
+        <div class="meta" style="margin-top:8px">Other phones and computers will need the new password.</div>
+      </form>
+      <div class="sep" id="acctSep"></div>
+      <div class="label" style="margin-top:14px">Settings</div>
+      <div class="meta">If you ticked "use these settings for all my future videos", they are remembered. This puts everything back the way it came.</div>
+      <button class="btn ghost" id="resetPrefs" type="button" style="margin-top:10px">Back to normal</button>
+      <div class="msg" id="prefsMsg" role="status"></div>
+    </div>
+  </details>
+
+  <div class="note">Videos are saved here until you delete them.</div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+let all = [], admin = false, me = "", showOlder = false, week = null;
+const posting = {};          // job id -> {status, posted:[{platform,date}]}
+const openForm = {};         // job id -> true while its 'Mark posted' form is open
+const PLATFORMS = [["youtube_shorts", "YouTube Shorts"], ["tiktok", "TikTok"], ["instagram_reels", "Instagram Reels"], ["facebook_reels", "Facebook Reels"]];
+const platName = p => (p === "youtube_long" ? [0, "YouTube long video"] : PLATFORMS.find(x => x[0] === p) || [0, p ? String(p).replace(/_/g, " ") : ""])[1];
+const DAYS = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday", Sun: "Sunday" };
+const DAYKEYS = Object.keys(DAYS);
+
+const when = iso => {
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })
+    + " · " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+};
+const mmss = s => { if (s == null) return "–"; s = Math.round(s); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+const monday = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const today = () => iso(new Date());
+
+// ---------- numbers ----------
+function stats(rows) {
+  const doneAll = rows.filter(r => r.status === "done");
+  const done = doneAll.filter(r => !r.parent);   // remakes are the same video again, so they don't count as new videos
+  const thisWeek = monday(new Date());
+  $("sTotal").textContent = done.length;
+  $("sWeek").textContent = done.filter(r => r.made_at && new Date(r.made_at) >= thisWeek).length;
+  const totalSecs = done.reduce((a, r) => a + (r.length || 0) * (r.parts || 1), 0);
+  if (totalSecs >= 6) { $("sMinutes").textContent = (totalSecs / 60).toFixed(1); $("sMinutesLabel").textContent = "minutes of video"; }
+  else { $("sMinutes").textContent = Math.round(totalSecs); $("sMinutesLabel").textContent = "seconds of video"; }
+  $("weeksBox").classList.toggle("hidden", done.length < 3);   // a chart of nearly nothing reads as broken
+  const builds = done.map(r => r.build_seconds).filter(Boolean);
+  $("sBuild").textContent = builds.length ? mmss(builds.reduce((a, b) => a + b, 0) / builds.length) : "–";
+  $("sRemakes").textContent = doneAll.filter(r => r.parent).length;
+  document.querySelectorAll(".admin-only").forEach(e => e.classList.toggle("hidden", !admin));
+  const mins = done.reduce((a, r) => a + (r.by_hand_minutes || 0), 0);
+  $("saved").classList.toggle("hidden", !mins);
+  $("sSaved").textContent = (mins / 60).toFixed(1);
+  const weeks = [];
+  for (let i = 7; i >= 0; i--) { const m = monday(new Date()); m.setDate(m.getDate() - 7 * i); weeks.push(m); }
+  const counts = weeks.map((m, i) => done.filter(r => {
+    const t = new Date(r.made_at); return t >= m && (i === 7 || t < weeks[i + 1]);
+  }).length);
+  const top = Math.max(5, ...counts);
+  $("weeks").innerHTML = counts.map((c, i) => `<div class="wk" title="${c} video(s), week of ${weeks[i].toLocaleDateString()}">
+      <em>${c || ""}</em><i class="${c >= 3 ? "" : "low"}" style="height:${(c / top) * 70}%"></i>
+      <small>${weeks[i].toLocaleDateString(undefined, { month: "short", day: "numeric" })}</small></div>`).join("");
+}
+
+// ---------- the week strip ----------
+function weekDate(abbr) {   // this week's date for 'Thu'
+  const d = monday(new Date()); d.setDate(d.getDate() + DAYKEYS.indexOf(abbr)); return d;
+}
+function renderWeek() {
+  if (!week) { $("weekCard").classList.add("hidden"); return; }
+  $("weekCard").classList.remove("hidden");
+  const n = week.count_this_week, free = week.free_days || [];
+  let t = `Posted <b>${n}</b> of <b>${week.goal_min}–${week.goal_max}</b> this week`;
+  if (free.length) {
+    const names = free.map(f => DAYS[f] || f);
+    t += " · " + (names.length === 1 ? `${names[0]} is free` : names.slice(0, -1).join(", ") + " and " + names[names.length - 1] + " are free");
+  }
+  $("weekText").innerHTML = t;
+  const title = ((all.find(r => r.status === "done" && !r.posted) || {}).title) || "";
+  $("free").innerHTML = free.length ? `<span>Remind me at</span><input type="time" id="remTime" class="timepick" value="12:00" aria-label="Reminder time">`
+    + free.map(f => `<a class="btn ghost small" data-day="${esc(f)}" data-title="${esc(title)}" href="#">Remind me ${esc((DAYS[f] || f).slice(0, 3))}</a>`).join("") : "";
+  document.querySelectorAll("#free a[data-day]").forEach(a => a.onclick = e => {
+    e.preventDefault();
+    const q = new URLSearchParams({ day: iso(weekDate(a.dataset.day)), time: $("remTime").value || "12:00" });
+    if (a.dataset.title) q.set("title", a.dataset.title);
+    location.href = "/api/posting/reminder.ics?" + q;   // a plain navigation, so a phone offers 'Add to calendar'
+  });
+}
+function loadWeek() {
+  return fetch("/api/posting/week").then(r => r.ok ? r.json() : null).then(d => { week = d; renderWeek(); }).catch(() => {});
+}
+
+// ---------- the list ----------
+function families(rows) {   // newest version of each video first, with its earlier versions
+  const by = {};
+  rows.forEach(r => (by[r.first_version] = by[r.first_version] || []).push(r));
+  return Object.values(by).map(g => {
+    g.sort((a, b) => (b.made_at || "").localeCompare(a.made_at || ""));
+    return g;
+  });
+}
+function versionNo(r) {   // 1 = the first upload, counting up through its remakes in time order
+  const family = all.filter(x => x.first_version === r.first_version).sort((a, b) => (a.made_at || "").localeCompare(b.made_at || ""));
+  return family.indexOf(r) + 1;
+}
+function status(r) {
+  const p = posting[r.job_id];
+  if (r.posted || (p && p.status === "posted")) return "posted";
+  return (p && p.status) || "draft";
+}
+function rowHtml(r, older) {
+  const done = r.status === "done", st = status(r);
+  const chips = [];
+  if (done) {
+    chips.push(st === "posted" ? `<span class="chip posted">Posted${(r.posted_to || []).length ? " to " + esc(r.posted_to.map(platName).filter(Boolean).join(", ")) : ""}</span>`
+      : st === "reviewed" ? `<span class="chip">Reviewed</span>` : `<span class="chip plain">Draft</span>`);
+  }
+  [r.mode === "own_audio" ? "Talking to camera" : r.mode === "voice" ? "Voice-over" : null,
+   r.shorts ? `${r.shorts} Short${r.shorts > 1 ? "s" : ""} from a long video` : r.parts > 1 ? `${r.parts} parts` : null, r.clips ? `${r.clips} clips` : null,
+   r.versions > 1 ? `Version ${versionNo(r)}` : null,
+   r.music ? "Music" : null, r.denoised ? "Noise removed" : null, r.private ? "Your pictures were not shared" : null,
+  ].filter(Boolean).forEach(t => chips.push(`<span class="chip plain">${esc(t)}</span>`));
+  if (r.warnings) chips.push(`<span class="chip warn">Things to check</span>`);
+  if (r.status === "failed") chips.push(`<span class="chip bad">Didn't finish</span>`);
+  if (r.status === "running" || r.status === "queued") chips.push(`<span class="chip warn">Still making…</span>`);
+  const n = (r.files || []).length;
+  const dl = done ? (r.files || []).map((f, i) => `<a class="btn ghost" data-dl="${esc(r.job_id)}" href="/api/jobs/${r.job_id}/${f}" download>${n > 1 ? `Download ${r.shorts ? "Short" : "Part"} ${i + 1} of ${n}` : "Download"}</a>`).join("") : "";
+  const form = openForm[r.job_id] ? `<div class="form" data-form="${esc(r.job_id)}">
+      <label>Where <select data-plat>${PLATFORMS.map(x => `<option value="${x[0]}">${x[1]}</option>`).join("")}</select></label>
+      <label>Day <input type="date" data-day value="${today()}" max="${iso(new Date(Date.now() + 864e5))}"></label>
+      <button class="btn small" data-save="${esc(r.job_id)}">Save</button><button class="btn quiet small" data-cancel="${esc(r.job_id)}">Cancel</button>
+      <div class="msg bad" data-fmsg style="flex-basis:100%"></div></div>` : "";
+  const canDel = r.status === "done" || r.status === "failed";
+  return `<div class="row${older ? " older" : ""}" data-job="${esc(r.job_id)}">
+    <div class="main">
+      ${done ? `<img class="thumb" loading="lazy" alt="" src="/api/jobs/${r.job_id}/thumb.jpg" onerror="this.style.visibility='hidden'">` : `<div class="thumb"></div>`}
+      <div>
+        <p class="title">${esc(r.title || "Untitled video")}</p>
+        <div class="meta">${r.made_at ? when(r.made_at) : ""}${done ? " · " + mmss(r.length) + (r.parts > 1 ? " each" : "") : ""}${admin && r.owner ? " · " + esc(r.owner) : ""}</div>
+        <div class="chips">${chips.join("")}</div>
+      </div>
+    </div>
+    <div class="acts">
+      <a class="btn" href="/?job=${r.job_id}">Open</a>${dl}
+    </div>
+    ${done || canDel ? `<div class="acts">
+      ${done && st !== "posted" ? `<button class="btn ghost small" data-mark="${esc(r.job_id)}">Mark posted</button>` : ""}
+      ${done && st === "draft" ? `<button class="btn ghost small" data-set="reviewed" data-job="${esc(r.job_id)}">Mark reviewed</button>` : ""}
+      ${done && st !== "draft" ? `<button class="btn quiet small" data-set="draft" data-job="${esc(r.job_id)}">Back to draft</button>` : ""}
+      ${canDel ? `<button class="btn quiet small" data-del="${esc(r.job_id)}" data-all="${older ? "" : "1"}">Delete</button>` : ""}
+    </div>` : ""}
+    ${form}
+  </div>`;
+}
+
+function render() {
+  const q = $("q").value.trim().toLowerCase(), who = $("owner").value, sort = $("sort").value;
+  const mineOnly = admin && who === "mine";
+  const rows = all.filter(r => (!q || (r.title || "").toLowerCase().includes(q)) && (!mineOnly || r.owner === me));
+  stats(rows);
+  let fams = families(rows);
+  if (sort === "old") fams = fams.reverse();
+  if (sort === "long") fams.sort((a, b) => (b[0].length || 0) * (b[0].parts || 1) - (a[0].length || 0) * (a[0].parts || 1));
+  $("tools").classList.toggle("hidden", families(all).length < 6);   // nothing to sort or search until there are a few
+  $("older").classList.toggle("hidden", !all.some(r => r.versions > 1));
+  $("older").textContent = showOlder ? "Hide earlier versions" : "Show earlier versions";
+  if (!fams.length) {
+    $("list").innerHTML = `<div class="empty">${all.length ? "No videos match." : "No videos yet. <a href='/'>Make your first one</a>."}</div>`;
+    return;
+  }
+  $("list").innerHTML = fams.map(g => rowHtml(g[0], false) + (showOlder ? g.slice(1).map(r => rowHtml(r, true)).join("") : "")).join("");
+  wire();
+}
+
+function wire() {
+  const L = $("list");
+  L.querySelectorAll("[data-dl]").forEach(a => a.addEventListener("click", () => track(a.dataset.dl, "download")));
+  L.querySelectorAll("[data-mark]").forEach(b => b.onclick = () => { openForm[b.dataset.mark] = true; render(); });
+  L.querySelectorAll("[data-cancel]").forEach(b => b.onclick = () => { delete openForm[b.dataset.cancel]; render(); });
+  L.querySelectorAll("[data-save]").forEach(b => b.onclick = async () => {
+    const f = b.closest("[data-form]"), msg = f.querySelector("[data-fmsg]");
+    b.disabled = true; msg.textContent = "";
+    const ok = await setStatus(b.dataset.save, "posted", f.querySelector("[data-plat]").value, f.querySelector("[data-day]").value, msg);
+    if (!ok) b.disabled = false;
+  });
+  L.querySelectorAll("[data-set]").forEach(b => b.onclick = () => setStatus(b.dataset.job, b.dataset.set));
+  L.querySelectorAll("[data-del]").forEach(b => b.onclick = () => del(b.dataset.del, !!b.dataset.all));
+}
+
+function track(job, kind) {   // a quiet note for the team page; never blocks anything
+  fetch(`/api/jobs/${job}/event`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind }) }).catch(() => {});
+}
+
+async function setStatus(job, status, platform, day, msgEl) {
+  const body = { status }; if (platform) body.platform = platform; if (day) body.date = day;
+  try {
+    const r = await fetch(`/api/jobs/${job}/posting`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { if (msgEl) msgEl.textContent = d.detail || "That didn't save. Please try again."; return false; }
+    posting[job] = d;
+    const row = all.find(x => x.job_id === job);
+    if (row) { row.posted = d.status === "posted"; row.posted_to = (d.posted || []).map(p => p.platform); }
+    delete openForm[job];
+    render(); loadWeek();
+    return true;
+  } catch (_) { if (msgEl) msgEl.textContent = "Can't reach the Video Maker right now. Please try again."; return false; }
+}
+
+async function del(job, whole) {
+  const text = whole ? "This removes the video and its saved clips. It can't be undone."
+                     : "This removes this earlier version. It can't be undone.";
+  if (!confirm(text)) return;
+  try {
+    const r = await fetch(`/api/jobs/${job}` + (whole ? "?all=1" : ""), { method: "DELETE" });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(d.detail || "That couldn't be removed. Please try again."); return; }
+    await load(); loadWeek();
+  } catch (_) { alert("Can't reach the Video Maker right now. Please try again."); }
+}
+
+async function loadPosting() {   // Draft / Reviewed / Posted for the videos on screen
+  const ids = families(all).map(g => g[0]).filter(r => r.status === "done").slice(0, 40).map(r => r.job_id);
+  await Promise.all(ids.map(id => fetch(`/api/jobs/${id}/posting`).then(r => r.ok ? r.json() : null).then(d => { if (d) posting[id] = d; }).catch(() => {})));
+}
+
+async function load() {
+  const d = await fetch("/api/videos").then(r => r.ok ? r.json() : Promise.reject(r));
+  all = d.videos; admin = d.admin; me = d.user;
+  $("who").innerHTML = `${d.user === "local" ? "On this computer" : "Signed in as " + esc(d.user)}${d.admin ? ' · <a href="/admin">Team page</a>' : ""}`;   // Sign out lives in the account menu in the top bar
+  $("pwForm").classList.toggle("hidden", d.user === "local");
+  $("acctSep").classList.toggle("hidden", d.user === "local");
+  const others = admin && all.some(r => r.owner && r.owner !== me);
+  $("adminTools").classList.toggle("hidden", !others);
+  if (!$("owner").options.length) {
+    $("owner").innerHTML = `<option value="mine">Only mine</option><option value="*">Everyone's videos</option>`;
+    $("owner").value = "mine";
+  }
+  $("numbersFold").classList.toggle("hidden", !all.length);
+  await loadPosting();
+  render();
+}
+
+// ---------- account ----------
+document.querySelectorAll(".peek").forEach(b => {
+  const input = document.getElementById(b.dataset.for);
+  const on = e => { e.preventDefault(); input.type = "text"; b.classList.add("held"); };
+  const off = () => { input.type = "password"; b.classList.remove("held"); };
+  b.addEventListener("pointerdown", on);
+  ["pointerup", "pointerleave", "pointercancel", "blur"].forEach(ev => b.addEventListener(ev, off));
+  b.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") on(e); });
+  b.addEventListener("keyup", off);
+  b.addEventListener("contextmenu", e => e.preventDefault());   // long-press on phones
+});
+$("pwForm").onsubmit = async e => {
+  e.preventDefault();
+  const m = $("pwMsg"); m.className = "msg"; m.textContent = "";
+  if ($("pwNew").value !== $("pwNew2").value) { m.className = "msg bad"; m.textContent = "The two new passwords don't match."; return; }
+  $("pwBtn").disabled = true;
+  try {
+    const r = await fetch("/api/change-password", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current: $("pwOld").value, new: $("pwNew").value }) });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { m.className = "msg good"; m.textContent = "Done. Your password is changed."; $("pwForm").reset(); }
+    else { m.className = "msg bad"; m.textContent = r.status === 429 ? (d.detail || "Too many tries. Please wait a few minutes.") : (d.detail || "That didn't work. Please try again."); }
+  } catch (_) { m.className = "msg bad"; m.textContent = "Can't reach the Video Maker right now. Please try again."; }
+  $("pwBtn").disabled = false;
+};
+$("resetPrefs").onclick = async () => {
+  if (!confirm("This puts the caption size and the other settings back to how they came, for your future videos. Your videos stay as they are.")) return;
+  const m = $("prefsMsg"); m.className = "msg"; m.textContent = "";
+  try {
+    const r = await fetch("/api/prefs", { method: "DELETE" });
+    m.className = r.ok ? "msg good" : "msg bad";
+    m.textContent = r.ok ? "Done. Your next video starts from the normal settings." : "That didn't work. Please try again.";
+  } catch (_) { m.className = "msg bad"; m.textContent = "Can't reach the Video Maker right now. Please try again."; }
+};
+
+["q", "owner", "sort"].forEach(id => $(id).addEventListener("input", render));
+$("older").onclick = () => { showOlder = !showOlder; render(); };
+load().catch(() => { $("list").innerHTML = `<div class="empty">Couldn't load your videos. <a href="/login">Sign in again</a>.</div>`; });
+loadWeek();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+</script>
+<script>
+// shared top bar: the account menu (who is signed in, Team page for admins, Sign out)
+(function () {
+  const g = id => document.getElementById(id);
+  g("acctBtn").onclick = e => { e.stopPropagation(); const open = g("acctMenu").classList.toggle("hidden") === false; g("acctBtn").setAttribute("aria-expanded", open); };
+  document.addEventListener("click", () => { g("acctMenu").classList.add("hidden"); g("acctBtn").setAttribute("aria-expanded", "false"); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") g("acctMenu").classList.add("hidden"); });
+  g("navSignout").onclick = async () => { await fetch("/api/logout", { method: "POST" }); location.href = "/login"; };
+  fetch("/api/me").then(r => r.ok ? r.json() : null).then(m => {
+    if (!m || m.local) return;
+    g("navUser").textContent = m.user;
+    g("acct").classList.remove("hidden");
+    g("adminLink").classList.toggle("hidden", !m.admin);
+  }).catch(() => {});
+})();
+</script>
+</body>
+</html>

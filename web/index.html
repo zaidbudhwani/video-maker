@@ -1,0 +1,2726 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alex's Video Maker</title>
+<meta name="theme-color" content="#2c76ae">
+<meta name="description" content="Phone clips in. A finished vertical video and a caption for each place you post, out.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alex's Video Maker">
+<meta property="og:description" content="Your clips. Your voice. Ready to share.">
+<meta property="og:image" content="__ORIGIN__/assets/og-image.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Alex's Video Maker: Your clips. Your voice. Ready to share.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Video Maker">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f7fb; --bg2: #e7eff7; --card: #ffffff; --ink: #1f1f1f; --muted: #54595f;
+    --line: #dbe5ee; --accent: #2c76ae; --brand: #6caedf; --accent-ink: #fff; --accent-soft: #e3f0fa;
+    --clay-ink: #8a3f1f; --clay: #c0643f; --clay-soft: #f7e6dc; --warn: #8a5300; --warn-soft: #fbf0dc; --bad: #a3281f; --bad-soft: #fbe7e4;
+    --shadow: 0 1px 2px rgba(20,50,80,.05), 0 8px 24px rgba(20,50,80,.07);
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1620; --bg2: #131d29; --card: #172230; --ink: #e9eff5; --muted: #9fb0c0;
+      --line: #2a3a4b; --accent: #6caedf; --brand: #6caedf; --accent-ink: #0b1a28; --accent-soft: #1c2f42;
+      --clay-ink: #f0b497; --clay: #e39472; --clay-soft: #3a2a22; --warn: #e8b86a; --warn-soft: #362c1b; --bad: #f08a80; --bad-soft: #3a2220;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; min-height: 100vh; color: var(--ink); font: 16px/1.55 var(--sans);
+         background: radial-gradient(1200px 500px at 50% -200px, var(--bg2), var(--bg)); }
+  main { max-width: 620px; margin: 0 auto; padding: 8px 16px 80px; }
+
+  header { text-align: center; margin: 12px 0 24px; }
+  .mark { width: 52px; height: 52px; margin: 0 auto 12px; border-radius: 16px; display: grid; place-items: center;
+          background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow); }
+  h1 { font: 650 32px/1.15 var(--serif); letter-spacing: -.01em; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0; font-size: 17px; }
+  .brand { color: var(--muted); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; margin-top: 10px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  h2 { font: 600 20px/1.3 var(--serif); margin: 0 0 4px; }
+
+  #drop { display: block; border: 2px dashed var(--line); border-radius: 18px; padding: 44px 20px; text-align: center; cursor: pointer;
+          background: var(--card); transition: border-color .15s, background .15s, transform .15s; box-shadow: var(--shadow); }
+  #drop:hover { border-color: var(--accent); }
+  #drop.over { border-color: var(--accent); background: var(--accent-soft); transform: scale(1.01); }
+  #drop .icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+  #drop b { display: block; font: 600 21px/1.3 var(--serif); margin-bottom: 4px; }
+  #drop .phone-only { display: inline; } #drop .wide-only { display: none; }
+  @media (min-width: 700px) { #drop .phone-only { display: none; } #drop .wide-only { display: inline; } }
+  /* once clips are in, "add more" is a plain outlined button so "Make my video" is the one strong thing */
+  #drop.compact { padding: 0 16px; min-height: 48px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--line); border-radius: 12px; box-shadow: none; background: transparent; }
+  #drop.compact .icon, #drop.compact .hint { display: none; }
+  #drop.compact b { font-size: 16px; font-family: var(--sans); color: var(--accent); margin: 0; }
+
+  .tips { margin: 14px 4px 0; padding: 0; list-style: none; color: var(--muted); font-size: 14px; text-align: center; }
+  .tips li { margin: 2px 0; }
+  .nav { display: flex; align-items: center; gap: 2px; min-height: 52px; max-width: 620px; margin: 0 auto; padding: 4px 8px 0; position: relative; }
+  .nav .grow { flex: 1; }
+  .nav a, .nav .navbtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: none;
+                          color: var(--ink); font: 600 15px var(--sans); text-decoration: none; cursor: pointer; }
+  .nav a:hover, .nav .navbtn:hover { background: var(--accent-soft); }
+  .nav a.cur { color: var(--accent); background: var(--accent-soft); }
+  .menu { position: absolute; right: 8px; top: 52px; z-index: 5; min-width: 170px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 4px; }
+  .menu a, .menu button { display: flex; width: 100%; min-height: 44px; align-items: center; border-radius: 8px; }
+  .navuser { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 8px; }
+  .label:first-child { margin-top: 0; }
+  .label > label { display: flex; align-items: center; min-height: 44px; margin: -14px 0; }   /* the whole line is a tap target */
+  ol { padding: 0; margin: 0; list-style: none; counter-reset: n; }
+  li.clip { display: flex; align-items: center; gap: 8px; padding: 8px 6px 8px 8px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+  li.clip .who { flex: 1; min-width: 0; line-height: 1.3; }
+  li.clip .who b { display: block; font-size: 16px; }
+  li.clip .sub { display: flex; gap: 8px; font-size: 13px; color: var(--muted); min-width: 0; }
+  li.clip .fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  li.clip .dur { flex: none; }
+  .voice { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--clay-soft); }
+  .voice svg { color: var(--clay); flex: none; }
+  .voice .vtext { flex: 1; min-width: 0; line-height: 1.35; }
+  .voice .vtext small { display: block; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .voice.missing { background: var(--accent-soft); color: var(--ink); display: block; }
+  .voice.missing p { margin: 0 0 10px; }
+  .vbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .vbtns button, .lite { min-height: 44px; padding: 0 14px; }
+  .vbtns #recGo { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  .rec { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .rec .dot { width: 14px; height: 14px; border-radius: 50%; background: #c0392b; flex: none; }
+  .rec .time { font: 600 20px var(--sans); font-variant-numeric: tabular-nums; }
+  .voice { flex-wrap: wrap; }
+  .voice audio { flex: 0 0 100%; width: 100%; height: 44px; }
+  .help-line { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+  .help-line.warn { color: var(--warn); background: var(--warn-soft); border-radius: 10px; padding: 8px 12px; }
+  .cthumb { width: 40px; height: 64px; object-fit: cover; border-radius: 6px; background: var(--bg2); flex: none; display: grid; place-items: center; color: var(--muted); }
+  .opt-field { display: block; width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; min-height: 44px; }
+  .section-gap { margin-top: 18px; }
+  .check.top { align-items: flex-start; }
+  .check.top input { margin-top: 3px; flex: none; }
+  .idea { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-top: 10px; background: var(--bg); }
+  .idea b { font: 600 17px/1.3 var(--serif); display: block; }
+  .shotplan { display: grid; gap: 8px; margin-top: 8px; }
+  .shotplan select { min-height: 44px; }
+  .shot-list { margin: 4px 0 0; padding-left: 22px; }
+  .shot-list li { margin: 8px 0; }
+  .shot-list li b { display: block; }
+  .shot-list li span { color: var(--muted); font-size: 15px; }
+  .shot-tips { margin: 6px 0 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+  .shot-tips li.fh { color: var(--ink); font-weight: 600; }
+  .idea ul { margin: 6px 0 8px; padding-left: 20px; color: var(--muted); font-size: 14px; }
+  .film { margin-top: 12px; }
+  .film summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; color: var(--accent); }
+  .film label { display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15px; }
+  .film input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+  .safe { margin: 14px 0 0; font-size: 16px; color: var(--ink); }
+  .safe a { font-weight: 600; }
+  .elapsed { margin: 4px 0 0; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .confirm-row { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+  .confirm-row span { flex-basis: 100%; text-align: center; }
+  .install { display: flex; gap: 10px; align-items: center; margin: 14px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; color: var(--muted); background: var(--card); }
+  .install span { flex: 1; }
+  .example-bar { background: var(--accent-soft); color: var(--accent); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .example-bar b { font-weight: 700; }
+  body.example .no-example, body.example #panels, body.example #fbOpen, body.example #fbCard, body.example .save { display: none !important; }
+  .linkbtn { background: none; border: 0; color: var(--accent); text-decoration: underline; padding: 0 4px; min-height: 44px; }
+
+  button { font: inherit; color: var(--ink); border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 6px 12px; cursor: pointer; transition: background .15s, border-color .15s; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .35; cursor: default; }
+  .icon-btn { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; flex: none; }
+  .big { display: block; width: 100%; margin-top: 20px; background: var(--accent); color: var(--accent-ink); border: none; padding: 16px;
+         font-size: 18px; font-weight: 600; border-radius: 14px; box-shadow: var(--shadow); }
+  .big:hover:not(:disabled) { filter: brightness(1.08); }
+  .ghost { background: none; border: none; color: var(--muted); text-decoration: underline; display: block; margin: 8px auto 0; min-height: 44px; }
+  @media (max-width: 480px) { .card { padding: 16px; } }
+  a { color: var(--accent); }
+
+  .err-box { background: var(--bad-soft); color: var(--bad); border-radius: 12px; padding: 12px 14px; white-space: pre-wrap; margin: 14px 0 0; }
+  .err-box:empty { display: none; }
+
+  /* progress */
+  .steps { list-style: none; margin: 18px 0 0; padding: 0; }
+  .steps li { display: flex; align-items: center; gap: 12px; padding: 9px 0; color: var(--muted); }
+  .steps .dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; flex: none; font-size: 13px; }
+  .steps li.active { color: var(--ink); font-weight: 600; }
+  .steps li.active .dot { border-color: var(--accent); border-top-color: transparent; animation: spin 1s linear infinite; }
+  .steps li.done .dot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .steps li.done .dot::after { content: "✓"; }
+  .bar { height: 8px; border-radius: 99px; background: var(--bg2); overflow: hidden; margin-top: 12px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .4s; }
+  .bar.wait i { width: 30% !important; animation: barwait 1.8s ease-in-out infinite; }
+  @keyframes barwait { 0% { margin-left: 0; } 50% { margin-left: 70%; } 100% { margin-left: 0; } }
+  @media (prefers-reduced-motion: reduce) { .bar.wait i { animation: none; margin-left: 0; width: 8% !important; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* results */
+  .player { background: #000; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 16px; }
+  video { display: block; width: 100%; max-height: 72vh; background: #000; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 4px; }
+  .chip { font-size: 14px; border-radius: 18px; padding: 4px 12px; background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .notehead { font-size: 13px; font-weight: 600; color: var(--muted); margin: 12px 0 6px; }
+  .notehead:first-child { margin-top: 0; }
+  /* the change panel is long: keep "Remake video" in reach while she scrolls through it */
+  /* the summary rides along with the button, so "Will change: ..." always sits right above Remake */
+  #remakeDock { position: sticky; bottom: 0; z-index: 3; background: var(--card); margin: 0 -4px; padding: 2px 4px 12px; border-radius: 12px 12px 0 0; }
+  #fbCard #remake { box-shadow: 0 6px 20px rgba(20,50,80,.22); }
+  #fbCard #remake:disabled { opacity: 1; background: var(--bg2, var(--line)); color: var(--muted); box-shadow: 0 6px 20px rgba(20,50,80,.12); }   /* solid, so text never shows through */
+  .field { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: var(--bg); }
+  .field .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .field .top .label { margin: 0; }
+  .field .text { white-space: pre-wrap; }
+  .field.title .text { font: 500 18px/1.35 var(--serif); }
+  .field button.copied { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .notes { background: var(--warn-soft); color: var(--warn); border-radius: 12px; padding: 12px 14px; margin-top: 6px; }
+  .notes p { margin: 4px 0; }
+  .ai { margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--clay-soft); }
+  .ai h3 { margin: 0 0 4px; font: 600 17px var(--serif); }
+  .ai p { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .fb-group { margin-top: 16px; }
+  .fb-group .label { margin: 0 0 8px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { padding: 9px 14px; border-radius: 99px; background: var(--bg); }
+  .opt.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .fix { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .fix input, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; min-width: 0; }
+  .fix input { flex: 1; }
+  textarea { width: 100%; min-height: 80px; resize: vertical; }
+  .check { display: flex; gap: 10px; align-items: center; margin-top: 16px; font-size: 15px; min-height: 44px; }
+  .check input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .summary { font-size: 14px; color: var(--accent); margin-top: 12px; min-height: 1.2em; }
+  .plan { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 2px; margin-top: 12px; background: var(--bg); }
+  .plan h3 { margin: 0 0 6px; font-size: 17px; }
+  .plan .plan-h { font-weight: 600; margin: 10px 0 2px; }
+  .plan ul { margin: 0 0 4px; padding-left: 20px; }
+  .plan-ask p { font-weight: 600; margin: 12px 0 8px; }
+  fieldset.music-pick { border: 0; padding: 0; margin: 0; min-width: 0; }
+  fieldset.music-pick legend { padding: 0; }
+  .music-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .mrow { display: flex; align-items: center; gap: 8px; }
+  .mrow label { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; min-height: 44px; cursor: pointer; font-size: 15px; }
+  .mrow input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
+  .mrow .by { color: var(--muted); font-size: 13px; }
+  .mrow .play { min-height: 44px; min-width: 76px; padding: 8px 12px; border-radius: 99px; background: var(--bg); flex: none; }
+  .mrow .play[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .row2 { display: flex; gap: 10px; }
+  .row2 .big { margin-top: 14px; }
+  .secondary { background: var(--card) !important; color: var(--ink) !important; border: 1px solid var(--line) !important; }
+  .version { display: inline-block; font-size: 13px; font-weight: 600; color: var(--clay-ink); background: var(--clay-soft); border-radius: 99px; padding: 2px 10px; margin-bottom: 10px; }
+  .ready-bar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 0 4px 14px; }
+  .ready-link { font-weight: 600; text-decoration: none; white-space: nowrap; display: inline-block; padding: 12px 6px; }
+  .note-box { background: var(--warn-soft); color: var(--warn); border-radius: 12px; padding: 12px 14px; margin: 0 0 12px; }
+  .how { display: flex; gap: 10px; list-style: none; padding: 0; margin: 0 0 14px; counter-reset: s; }
+  .how li { flex: 1; counter-increment: s; font-size: 14px; color: var(--muted); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .how li::before { content: counter(s); display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 13px; }
+  @media (max-width: 560px) { .how { flex-direction: column; gap: 6px; } }
+  .reorder { padding: 0; margin: 0 0 8px; list-style: none; }
+  .reorder li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; margin-bottom: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+  .reorder li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .hidden { display: none !important; }
+  .fade { animation: fade .12s ease; }   /* opacity only, so a screenshot or a slow phone never catches it looking greyed out */
+  @keyframes fade { from { opacity: .4; } }
+
+  /* result page: tabs, copy buttons, heads-up panels */
+  .tab { padding: 0 16px; min-height: 44px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); }
+  .tab[aria-selected="true"], .tab[aria-pressed="true"], .tab.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .opt { min-height: 44px; }
+  .copybtn { min-height: 44px; min-width: 76px; padding: 0 14px; border: 1.5px solid var(--accent); color: var(--accent); font-weight: 600; background: var(--card); }
+  .field button.copied { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .field .top { margin-bottom: 6px; }
+  .copyhint { font-size: 14px; color: var(--warn); margin-top: 6px; }
+  .copyhint:empty { display: none; }
+  a.big { text-align: center; text-decoration: none; }
+  a.big.secondary { display: block; }
+  .alt-dl { display: block; text-align: center; min-height: 44px; line-height: 44px; font-size: 15px; }
+  .next-line { margin: 12px 4px 2px; color: var(--muted); font-size: 15px; }
+  .split-note { margin: 0 4px 12px; font-size: 16px; }
+  .part-for { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  .small-link { font-size: 14px; margin-left: 6px; }
+  details.more { margin-top: 12px; }
+  details.more > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; color: var(--accent); }
+  .field details.more, #copy > details.more { margin: 0 0 10px; }
+  #copy > details.more[open] > summary { margin-bottom: 6px; }
+  .quiet-row { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: center; margin-top: 8px; }
+  .quiet-row .linkbtn { color: var(--muted); font-size: 15px; }
+  #summary { font-size: 15px; color: var(--ink); margin-top: 14px; }
+  #summary:empty { display: none; }
+  .checkrow { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 8px 0; font-size: 16px; }
+  .checkrow input { width: 24px; height: 24px; margin-top: 1px; accent-color: var(--accent); flex: none; }
+  .checkrow, .check { cursor: pointer; }
+  #reviewNotes .notes { margin-top: 12px; }
+  .card.heads { background: var(--warn-soft); border-color: transparent; }
+  .card.heads h2 { color: var(--ink); }
+  .seek { display: flex; gap: 12px; align-items: center; width: 100%; min-height: 44px; margin-bottom: 8px; text-align: left; background: var(--card); padding: 8px 12px; }
+  .seek b { font-variant-numeric: tabular-nums; color: var(--accent); flex: none; }
+  .seek span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .wordrow { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .wordrow .seek { width: auto; margin: 0; flex: none; }
+  .wordrow input { flex: 1; min-width: 0; min-height: 44px; font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+  .shots { margin: 0; padding: 0; list-style: none; }
+  .shots > li { border-top: 1px solid var(--line); padding: 8px 0; }
+  .shots .shot { display: flex; gap: 10px; align-items: center; width: 100%; min-height: 44px; text-align: left; background: var(--card); padding: 6px 8px; }
+  .shots .shot .cthumb { width: 36px; height: 64px; }
+  .shots .shot .words { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .shots .shot b { font-variant-numeric: tabular-nums; color: var(--accent); flex: none; }
+  .shots .mw { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .shots .mw.good { color: var(--good, var(--muted)); }
+  .shots .mw.none, .shots .mw.unsure { color: var(--ink); }
+  .shots .change { min-height: 44px; margin-top: 6px; }
+  .picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; padding: 0; list-style: none; }
+  .picker button { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 76px; min-height: 44px; padding: 6px; border-radius: 10px; background: var(--bg); border: 2px solid var(--line); max-width: 110px; }
+  .picker button[aria-pressed="true"] { border-color: var(--accent); }
+  .picker button span { font-size: 13px; overflow-wrap: anywhere; }
+  .picker .cthumb { width: 54px; height: 96px; }
+  .did { margin: 0; padding: 0; list-style: none; }
+  .did li { padding: 8px 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; }
+  .did li span { color: var(--muted); font-size: 14px; }
+  p.trans { line-height: 1.9; margin: 0 0 12px; }
+  .tpart { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  button.w { border: 0; background: none; padding: 2px 0; margin: 0; font: inherit; color: inherit; cursor: pointer; border-radius: 4px; }
+  button.w:hover { background: var(--accent-soft); }
+  button.w.maybe { background: var(--warn-soft); text-decoration: underline dotted; }
+  .chipbtn { min-height: 32px; padding: 0 4px; font-size: 14px; color: inherit; }
+  .reorder .rname { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .reorder li { padding: 6px 8px; }
+  .reorder li > b { width: 18px; text-align: center; color: var(--muted); }
+  .reorder .cthumb { width: 36px; height: 64px; flex: none; }
+
+  /* shorts from a long video */
+  fieldset.modecard { margin: 0 0 16px; min-width: 0; }
+  fieldset.modecard legend { padding: 0; float: left; width: 100%; margin: 0 0 8px; }
+  .modeopt { display: flex; gap: 12px; align-items: flex-start; clear: both; padding: 12px 14px; margin-bottom: 8px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg); cursor: pointer; min-height: 44px; }
+  .modeopt input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+  .modeopt b { display: block; font-size: 17px; }
+  .modeopt small { display: block; color: var(--muted); font-size: 14px; line-height: 1.4; }
+  .modeopt.on { border-color: var(--accent); background: var(--accent-soft); }
+  .long-only { display: none; }
+  body.long .long-only { display: block; }
+  body.long .clips-only { display: none !important; }
+  body.long #clips .icon-btn[aria-label^="Move"] { display: none; }
+  .long-only.hidden { display: none !important; }
+  .shorts-n { width: 110px; }
+  .short-from { margin: 0 4px 10px; font-size: 15px; }
+  .short-from .why { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .field .desc { white-space: normal; }
+  .field .desc p { margin: 0 0 10px; white-space: pre-wrap; }
+  .chapters { list-style: none; margin: 0 0 10px; padding: 0; }
+  .chapters li { display: flex; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); }
+  .chapters li b { flex: none; min-width: 52px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .chapters li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+  /* Top bar: one floating pill on every page (after Navbar Gallery: Supaste's floating capsule, IntegratedBio's grouped links) */
+  .nav { position: sticky; top: 8px; z-index: 30; max-width: 760px; margin: 8px auto 4px; padding: 5px; min-height: 58px; gap: 6px;
+         background: var(--card); background: color-mix(in srgb, var(--card) 86%, transparent);
+         -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+         border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 8px 28px rgba(20, 45, 75, .08); }
+  @media (max-width: 800px) { .nav { margin: 8px 12px 4px; } }
+  .nav .logo { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%;
+               background: var(--accent); color: var(--accent-ink); }
+  .nav .logo:hover { background: var(--accent); filter: brightness(1.08); }
+  .nav .seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 999px; background: var(--accent-soft); }
+  .nav .seg a { border-radius: 999px; padding: 0 16px; white-space: nowrap; }
+  .nav .seg a:hover { background: transparent; color: var(--accent); }
+  .nav .seg a.cur { background: var(--card); color: var(--accent); box-shadow: 0 1px 4px rgba(20, 45, 75, .14); }
+  .nav .navbtn { border-radius: 999px; max-width: 100%; min-width: 44px; }
+  .nav #acct { min-width: 0; }
+  .navuser { min-width: 0; }
+  .menu { top: 62px; border-radius: 16px; }
+  @media (max-width: 420px) { .nav .seg a { padding: 0 11px; font-size: 14px; } .navuser { max-width: 64px; } }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* Opening: one promise, one sentence, the upload right under it (after Supahero's Wise hero); the 3D scene beside it */
+  .hero { display: grid; grid-template-columns: 1fr; gap: 6px; align-items: center; text-align: center; margin: 6px 0 16px; }
+  .hero h1 { font: 650 31px/1.12 var(--serif); letter-spacing: -.015em; margin: 6px 0 8px; }
+  .hero .h1-accent { color: var(--accent); }
+  .hero .nw { white-space: nowrap; }
+  @media (max-width: 560px) { .hero .brand-name { display: none; } }
+  .hero .sub { font-size: 16px; max-width: 34em; margin: 0 auto; }
+  .hero .brand { margin: 0; font-size: 12px; }
+  #heroStage:empty { display: none; }
+  #heroStage #stage3d-hero { margin: 0 !important; }
+  @media (min-width: 760px) {
+    main { max-width: 760px; }
+    .hero { grid-template-columns: 1.1fr .9fr; gap: 24px; text-align: left; margin: 14px 0 22px; }
+    .hero:has(#heroStage:empty) { grid-template-columns: 1fr; text-align: center; }
+    .hero h1 { font-size: 40px; }
+    .hero .sub { margin: 0; }
+    .hero:has(#heroStage:empty) .sub { margin: 0 auto; }
+    #pick { max-width: 620px; margin: 0 auto; }
+  }
+  .how { flex-wrap: wrap; margin: 14px 0 0; }
+  .how li { min-width: 130px; font-size: 13.5px; padding: 9px 11px; }
+  .how li b { color: var(--ink); }
+  @media (max-width: 560px) { .how { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .how li { min-width: 0; } }
+  .guide-box { background: var(--accent-soft); color: var(--ink); border-radius: 12px; padding: 12px 14px; margin: 0 0 12px; }
+  .flash { animation: flash 1.8s ease 1; }
+  @keyframes flash { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 25% { box-shadow: 0 0 0 4px var(--accent); } }
+  @media (prefers-reduced-motion: reduce) { .flash { animation: none; outline: 3px solid var(--accent); } }
+  /* review helpers: tips, saved settings, trust line, timer, compare (plain, no motion) */
+  .tips-card button { min-height: 44px; padding: 0 18px; }
+  .tips-card ol { margin: 6px 0 12px; padding-left: 22px; } .tips-card li { margin: 6px 0; }
+  .saved-card ul { margin: 6px 0 10px; padding-left: 20px; } .saved-card li { margin: 4px 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .trust-line { margin: 0 4px 12px; font-size: 15px; }
+  .review-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 4px 12px; }
+  .review-row button, .cmp-controls button { min-height: 44px; padding: 0 14px; }
+  .cmp-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 720px) { .cmp-grid { grid-template-columns: 1fr 1fr; } }
+  .cmp-grid figure { margin: 0; text-align: center; }
+  .cmp-grid { align-items: start; }
+  .cmp-grid video { display: block; margin: 0 auto; width: 100%; max-height: 42vh; background: #000; border-radius: 10px; object-fit: contain; }
+  @media (min-width: 720px) { .cmp-grid video { max-height: 70vh; } }
+  .cmp-grid figcaption { font-weight: 600; margin: 6px 0 0; }
+  .cmp-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+  .cmp-controls input[type=range] { flex: 1 1 180px; min-height: 44px; }
+  :is(.review-row, .cmp-controls, .tips-card, .saved-card) :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+<link rel="stylesheet" href="/static/lenis.css">
+<script defer src="/static/gsap.min.js"></script>
+<script defer src="/static/lenis.min.js"></script>
+<script defer src="/static/motion.js"></script>
+</head>
+<body>
+<nav class="nav" id="nav" aria-label="Main">
+  <a href="/" class="logo" aria-label="Alex's Video Maker: make a new video"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2.5"/><path d="M16 10l5-3v10l-5-3z"/></svg></a>
+  <span class="seg"><a href="/" id="navNew" class="cur" aria-current="page">Make a video</a><a href="/videos" id="navVideos">My videos</a></span>
+  <span class="grow"></span>
+  <span id="acct" class="hidden">
+    <button class="navbtn" id="acctBtn" aria-haspopup="true" aria-expanded="false"><span class="navuser" id="navUser"></span>&nbsp;&#9662;</button>
+    <div class="menu hidden" id="acctMenu"><a href="/admin" id="adminLink" class="hidden">Team page</a><button class="navbtn" id="signout">Sign out</button></div>
+  </span>
+</nav>
+<main>
+  <header id="hdr" class="hero">
+    <div class="hero-text">
+      <div class="brand"><span class="brand-name">Alex's Video Maker · </span>Alex Morgan · Example Realty</div>
+      <h1><span class="nw">Your clips.</span> <span class="nw">Your voice.</span> <span class="h1-accent nw">Ready to share.</span></h1>
+      <p class="sub" id="subLine">Add your phone clips and, if you like, a voice-over. Get back a finished vertical video and a caption for each place you post.</p>
+    </div>
+    <div id="heroStage" aria-hidden="true"></div>
+  </header>
+
+  <section id="pick" class="fade">
+    <p id="pickNote" class="note-box hidden" role="status"></p>
+    <fieldset class="card modecard" id="modeCard">
+      <legend class="label">What are you making?</legend>
+      <label class="modeopt on" id="modeClipsL"><input type="radio" name="mode" value="clips" checked><span><b>A video from my clips</b><small>Your phone clips joined into one video, under 60 seconds.</small></span></label>
+      <label class="modeopt" id="modeLongL"><input type="radio" name="mode" value="long"><span><b>Shorts from a long video</b><small>One finished long video in. The best moments come out as Shorts.</small></span></label>
+      <p class="help-line long-only" id="longExplain">Pick your finished long video. I'll find the best moments and cut them into Shorts, and write the title, chapters and description for the long video. Your long video itself isn't changed.</p>
+    </fieldset>
+    <label id="drop">
+      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></div>
+      <b id="dropTitle"><span class="phone-only">Add your clips</span><span class="wide-only">Drop your files here</span></b>
+      <span class="hint muted" id="dropHint"><span class="phone-only">Tap to pick videos from your phone. You can also add a voice-over, a voice memo, if you recorded one.</span><span class="wide-only">or click to choose your video clips, plus a voice-over if you recorded one</span></span>
+      <input id="files" type="file" multiple accept="video/*,audio/*,.m4a" hidden>
+    </label>
+    <ol class="how" id="how">
+      <li id="how1"><b>Add</b> your clips, and a voice-over if you have one</li>
+      <li id="how2"><b>Make</b> your video. It takes a few minutes</li>
+      <li id="how3"><b>Review</b> it and ask for any changes</li>
+      <li id="how4"><b>Save</b> it and copy the captions</li>
+    </ol>
+    <ul class="tips" id="tips">
+      <li>Phone clips are fine.</li><li>Any order: I sort them for you.</li><li id="tipLong">Over a minute? I split it into parts.</li>
+    </ul>
+    <p class="tips hidden" id="exampleWrap" style="margin-top:6px"><button class="linkbtn" id="exampleBtn">See an example of a finished video</button></p>
+
+    <div class="card tips-card hidden" id="tipsCard" role="region" aria-labelledby="tipsHead">
+      <h2 id="tipsHead" style="margin-top:0">Three quick tips</h2>
+      <ol>
+        <li>Film each room or thing you'll talk about for 5 to 10 seconds, holding the phone steady.</li>
+        <li>Record your voice-over as a voice memo, under a minute. Say a little about each thing you filmed.</li>
+        <li>Nothing posts by itself. You watch your video, change anything you like, then post it yourself.</li>
+      </ol>
+      <button id="tipsDone">Got it</button><p id="tipsMsg" role="status"></p>
+    </div>
+    <div class="card saved-card hidden" id="savedCard">
+      <div class="label">Using your last settings</div>
+      <p class="help-line" style="margin:0" id="savedLead">You asked me to use these for all your videos, so your next one has them too:</p>
+      <ul id="savedList"></ul>
+      <button class="linkbtn" id="savedReset" style="padding:0">Back to normal settings</button>
+      <p class="help-line hidden" id="savedMsg" role="status"></p>
+    </div>
+
+    <div class="card hidden clips-only" id="kindCard" style="margin-top:16px">
+      <label class="label" for="kind">What kind of video?</label>
+      <select id="kind" class="opt-field"><option value="auto">Let the Video Maker decide</option></select>
+      <details class="film hidden" id="film"><summary>What should I film?</summary><div id="filmList"></div></details>
+      <div id="ideasWrap" class="section-gap">
+        <button id="ideasBtn" class="lite">What should I film this week?</button>
+        <p class="help-line hidden" id="ideasMsg" role="status"></p>
+        <div id="ideas"></div>
+        <details class="film" id="shotPlan"><summary>Plan my shots from what I'll say</summary>
+          <div class="shotplan">
+            <label class="label" for="shotText">What you plan to say</label>
+            <textarea id="shotText" maxlength="4000" placeholder="e.g. Come see the large deck off the back, then the kitchen with its big island."></textarea>
+            <div class="shot-reuse hidden" id="shotReuseWrap">
+              <label class="label" for="shotReuse">Or reuse the words of an earlier video</label>
+              <select id="shotReuse" class="opt-field"><option value="">Choose a video</option></select>
+            </div>
+            <button id="shotBtn" class="lite">List the shots I need</button>
+            <p class="help-line hidden" id="shotMsg" role="status"></p>
+            <ol id="planList" class="shot-list"></ol>
+            <ul id="shotTips" class="shot-tips hidden"></ul>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div id="list" class="card hidden" style="margin-top:16px">
+      <div class="label" id="listLabel">Clips, in play order</div>
+      <p class="help-line" style="margin:-4px 0 10px" id="orderHelp">I'll put your clips in the order you filmed them, so you don't need to number or sort them. Use the arrows only if you want a different order.</p>
+      <ol id="clips"></ol>
+      <p class="help-line hidden clips-only" id="lenLine" role="status"></p>
+      <p class="help-line hidden" id="moveLine"></p>
+      <div class="long-only" id="longBox">
+        <div class="label"><label for="shortsN">How many Shorts? (1 to 5)</label></div>
+        <input id="shortsN" class="opt-field shorts-n" type="number" min="1" max="5" step="1" value="3" inputmode="numeric">
+        <p class="help-line" id="longTime" role="status"></p>
+        <p class="help-line hidden" id="longVoiceNote">Your voice-over isn't used for Shorts from a long video, so I left it out.</p>
+      </div>
+      <div class="label clips-only">Voice-over</div>
+      <p class="help-line clips-only" style="margin:-4px 0 10px">Optional. A recording of you talking, to play over the clips.</p>
+      <div id="voice" class="voice clips-only"></div>
+      <p class="help-line hidden clips-only" id="voiceLine" role="status"></p>
+      <input id="voiceFile" type="file" accept="audio/*,.m4a,.webm,.ogg,.mp3,.wav" hidden>
+
+      <fieldset class="modecard clips-only section-gap" id="shapeBox" style="border:0;padding:0;margin:16px 0 0">
+        <legend class="label">What shape of video?</legend>
+        <label class="modeopt on" id="shapeVL"><input type="radio" name="shape" value="vertical" checked><span><b>Social video (vertical)</b><small>Upright, for Shorts, Reels and TikTok. Under 60 seconds.</small></span></label>
+        <label class="modeopt" id="shapeHL"><input type="radio" name="shape" value="horizontal"><span><b>YouTube video (horizontal, 1920x1080)</b><small>Sideways, for a normal YouTube video. Up to 15 minutes.</small></span></label>
+        <label class="check top hidden" id="tallFillL"><input type="checkbox" id="tallFill"><span>Fill the screen with my upright clips<br><span class="muted">Normally a clip filmed upright on your phone is shown whole, with plain bars at the sides. Tick this to fill the screen instead: the top and bottom of those clips are cut off.</span></span></label>
+      </fieldset>
+
+      <div class="label section-gap"><label for="hints">Names or places I should know</label></div>
+      <input id="hints" class="opt-field" maxlength="400" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="e.g. Ellis Park Dr, Shellsburg">
+      <p class="help-line">Optional. A few street or town names help me spell them right in the captions.</p>
+
+      <p class="help-line long-only" id="longAiNote">To find the moments and write the titles, the words you say (text only) are sent to an AI helper. Pictures from your video are never shared.</p>
+      <label class="check top clips-only"><input type="checkbox" id="private"><span>Don't share any pictures from my clips<br><span class="muted">Normally a few small pictures from your clips go to an AI helper so it can match your clips to your words. Tick this to keep them private. Your clips then stay in the order you set.</span></span></label>
+      <fieldset class="music-pick hidden" id="musicPick"><legend class="label">Music</legend>
+        <p class="help-line" style="margin:-2px 0 8px">Quiet music plays under your voice. Tap Play to hear the first 10 seconds of a track.</p>
+        <div class="music-list" id="musicList"></div>
+        <p class="help-line music-note">These tracks are from Pixabay's free music library. Even free music can, now and then, get a copyright claim on YouTube. If that happens, tell us and we'll take that track out.</p>
+      </fieldset>
+      <label class="check top"><input type="checkbox" id="musicDuck"><span>Dip the music gently while I speak (optional)</span></label>
+      <label class="check top"><input type="checkbox" id="denoise"><span>Remove background noise (wind, fans, traffic)</span></label>
+      <p id="pickErr" class="err-box" role="alert"></p>
+      <button class="linkbtn long-only hidden" id="toClips" style="margin:8px auto 0">Use A video from my clips instead</button>
+      <p class="help-line" id="readyLine" style="text-align:center;margin-top:14px">Tap Make my video when your clips are in order.</p>
+      <button id="go" class="big" style="margin-top:8px">Make my video</button>
+      <button class="ghost" id="reset">Start over</button>
+      <div class="confirm-row hidden" id="resetAsk"><span>Remove all your clips?</span><button id="resetNo">Cancel</button><button id="resetYes" style="color:var(--bad)">Remove them</button></div>
+    </div>
+    <div class="install hidden" id="install"><span id="installText"></span><button id="installGo" class="hidden">Add</button><button id="installNo">Got it</button></div>
+  </section>
+
+  <section id="working" class="card hidden fade">
+    <h2 id="step">Uploading your files…</h2>
+    <p class="muted" id="waitNote"></p>
+    <div class="bar"><i id="barFill"></i></div>
+    <p class="elapsed" id="elapsed" aria-live="off"></p>
+    <ul class="steps" id="steps"></ul>
+    <p class="safe hidden" id="safeLine"><b>Safe to close this page.</b> Your video will be in <a href="/videos">My videos</a>.</p>
+  </section>
+
+  <section id="failed" class="card hidden fade">
+    <h2>Something needs fixing</h2>
+    <p class="muted" id="failLead">No video was made this time. Here's what happened:</p>
+    <p id="failMsg" class="err-box"></p>
+    <p class="muted" id="failKept" style="margin-top:12px"></p>
+    <button class="big hidden" id="again">Make it again with the same clips</button>
+    <button class="big" id="retry">Back to my clips</button>
+    <p class="muted" id="helpLine" style="text-align:center;margin:14px 0 0">If it keeps happening, tell the maintainer.</p>
+  </section>
+
+  <section id="done" class="hidden fade">
+    <div class="example-bar hidden" id="exampleBar"><span><b>Example.</b> This is a sample video, not yours. Nothing here can be changed.</span><button class="linkbtn" id="exampleLeave">Make my own video</button></div>
+    <div class="ready-bar">
+      <div><h2 style="margin:0" id="readyTitle">Your video is ready</h2><div class="muted" id="madeAt"></div></div>
+      <a class="ready-link" href="/videos">My videos →</a>
+    </div>
+    <div id="versionTag"></div>
+    <p class="trust-line hidden no-example" id="trustLine"></p>
+    <div class="review-row no-example" id="reviewRow">
+      <button class="lite hidden" id="compareBtn"></button>
+      <button class="lite" id="timerBtn" aria-describedby="timerTxt">Time my review</button>
+      <span class="muted" id="timerTxt" role="status"></span>
+    </div>
+    <p class="split-note hidden" id="splitNote"></p>
+    <p class="next-line hidden" id="ytJump" style="margin:0 4px 12px"><span id="ytJumpText">Also ready: a title, a description with chapters and a captions file for your long video.</span> <button class="linkbtn" id="ytJumpBtn" style="min-height:44px">Jump to it</button></p>
+    <div class="opts hidden" id="partTabs" role="tablist" aria-label="Parts of your video" style="margin-bottom:12px"></div>
+    <div id="players"></div>
+    <div class="card hidden no-example" id="compareCard" role="region" aria-labelledby="cmpHead">
+      <h2 id="cmpHead" style="margin-top:0">Compare versions</h2>
+      <p class="muted" style="margin-top:0" id="cmpLead">Both versions play together from the same moment. You hear the newer one.</p>
+      <div class="cmp-grid">
+        <figure><video id="cmpOld" playsinline muted preload="auto"></video><figcaption id="cmpOldCap"></figcaption></figure>
+        <figure><video id="cmpNew" playsinline preload="auto"></video><figcaption id="cmpNewCap"></figcaption></figure>
+      </div>
+      <div class="cmp-controls">
+        <button id="cmpPlay">Play both</button>
+        <label class="sr-only" for="cmpSeek">Where in the video</label>
+        <input type="range" id="cmpSeek" min="0" max="60" step="0.1" value="0">
+        <span class="muted" id="cmpTime" aria-live="off">0:00</span>
+        <button class="linkbtn" id="cmpClose">Close compare</button>
+      </div>
+      <p class="muted hidden" id="cmpNote" role="status" style="margin:8px 0 0"></p>
+    </div>
+    <button class="big secondary" id="fbOpen" style="margin:0 0 16px">Not quite right? Change something</button>
+    <div class="card hidden" id="fbCard">
+      <h2>Not quite right?</h2>
+      <p class="muted" style="margin-top:0">Tap what you'd change, then tap Remake video.</p>
+
+      <div class="fb-group hidden" id="shortsGroup"><div class="label"><label for="shortsBox">How many Shorts?</label></div>
+        <input id="shortsBox" class="opt-field shorts-n" type="number" min="1" max="5" step="1" inputmode="numeric">
+        <p class="muted" style="margin:6px 0 0">A number from 1 to 5. I pick the best moments again, up to this many.</p>
+      </div>
+
+      <div class="fb-group"><div class="label">Captions</div><div class="opts">
+        <button class="opt" data-k="size" data-v="-1">Smaller</button><button class="opt" data-k="size" data-v="1">Bigger</button>
+        <button class="opt" data-k="pos" data-v="1">Move up</button><button class="opt" data-k="pos" data-v="-1">Move down</button>
+        <button class="opt" data-k="capoff" data-v="1" id="capToggle">Turn captions off</button>
+      </div></div>
+
+      <div class="fb-group"><div class="label">Fix a word in the captions</div>
+        <div id="fixes"></div>
+        <button id="addFix">+ Add a word fix</button>
+      </div>
+
+      <div class="fb-group"><div class="label">Pauses</div><div class="opts">
+        <button class="opt" data-k="pause" data-v="-1">Cut more pauses (snappier)</button>
+        <button class="opt" data-k="pause" data-v="1">Keep more pauses (more natural)</button>
+        <button class="opt" data-k="fillers" data-v="1" id="fillerToggle">Keep the "um"s and "uh"s</button>
+      </div></div>
+
+      <div class="fb-group"><div class="label"><label for="comment">Anything else?</label></div>
+        <p class="muted" style="margin:0 0 6px">Type it your own way and I'll change the video to match. This only changes this video.</p>
+        <textarea id="comment" placeholder="e.g. The captions are too small and cut the pauses tighter"></textarea>
+      </div>
+
+      <details class="more" id="moreOpts"><summary>More options</summary>
+        <div class="fb-group" id="matchGroup"><div class="label">Which clip goes where</div><div class="opts">
+          <button class="opt" data-k="clips" data-v="1" id="matchToggle">Give each clip equal time</button>
+          <button class="opt" data-k="order" data-v="1" id="orderToggle">Keep my clip order</button>
+          <button class="opt" data-k="twice" data-v="1" id="twiceToggle">Double-check the clip matching</button>
+          <button class="opt" data-k="steady" data-v="1" id="steadyToggle">Always start each clip at the beginning</button>
+        </div></div>
+
+        <div class="fb-group" id="startGroup"><div class="label">Clip starts</div><div class="opts">
+          <button class="opt" data-k="starts" data-v="1" id="startToggle">Keep the start of each clip</button>
+        </div></div>
+
+        <div class="fb-group"><div class="label">Sound</div><div class="opts">
+          <button class="opt" data-k="noise" data-v="1" id="noiseToggle">Remove background noise</button>
+        </div></div>
+
+        <div class="fb-group" id="frameGroup"><div class="label">Framing</div><div class="opts">
+          <button class="opt" data-k="frame" data-v="auto">Fill the screen, centered on me</button>
+          <button class="opt" data-k="frame" data-v="fill">Fill the screen, centered crop</button>
+          <button class="opt" data-k="frame" data-v="fit">Show the whole frame</button>
+        </div></div>
+
+        <div class="fb-group" id="musicGroup"><div class="label">Music</div><div class="opts" id="musicLevel">
+          <button class="opt" data-k="music" data-v="-1">Quieter</button><button class="opt" data-k="music" data-v="1">Louder</button>
+          <button class="opt" data-k="music" data-v="off">No music</button>
+          <button class="opt" data-k="duck" data-v="1" id="duckToggle">Dip music while I speak</button>
+        </div>
+          <div class="music-list" id="fbMusicList" role="radiogroup" aria-label="Which music"></div>
+        </div>
+
+        <div class="fb-group" id="kindGroup"><div class="label"><label for="fmtSel">What kind of video is this?</label></div>
+          <select id="fmtSel" class="opt-field">
+            <option value="auto">Let the Video Maker decide</option><option value="house_tour">House tour</option><option value="recipe">Recipe</option>
+            <option value="tips">Tips</option><option value="market_update">Market update</option><option value="qa">Question and answer</option>
+          </select>
+        </div>
+
+        <div class="fb-group"><div class="label"><label for="hintsBox">Names or places I should know</label></div>
+          <input id="hintsBox" class="opt-field" maxlength="400" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="e.g. Ellis Park Dr, Shellsburg">
+          <p class="muted" style="margin:6px 0 0">A few street or town names help me spell them right.</p>
+        </div>
+
+        <div class="fb-group" id="orderGroup"><div class="label">Clip order</div>
+          <p class="muted" style="margin:0 0 8px">Out of order? Move a clip, then make the video again.</p>
+          <ol class="reorder" id="reorderList"></ol>
+          <button class="opt" id="reorderGo" disabled>Make it in this order</button>
+        </div>
+
+        <div class="fb-group"><div class="label"><label for="byHand">Just for us</label></div>
+          <p class="muted" style="margin:0 0 6px">Optional: roughly how long would this have taken you to edit yourself? It helps us measure time saved.</p>
+          <input id="byHand" type="number" min="1" max="1440" inputmode="numeric" placeholder="minutes" style="width:140px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-height:44px">
+        </div>
+      </details>
+
+      <label class="check"><input type="checkbox" id="remember"> Use these settings for all my future videos</label>
+      <div id="remakeDock">
+        <div class="summary" id="summary" role="status"></div>
+        <p id="fbGuide" class="guide-box hidden" role="status"></p>
+      <p id="fbErr" class="err-box" role="alert"></p>
+        <div class="plan hidden" id="plan" role="region" aria-labelledby="planHead">
+          <h3 id="planHead" tabindex="-1">Before I remake it</h3>
+          <div id="planBody"></div>
+          <div class="plan-ask hidden" id="planAsk"><p id="planQ"></p><div class="opts" id="planOpts"></div></div>
+          <div class="row2"><button class="big secondary" id="planBack">Back</button><button class="big" id="planGo">Confirm</button></div>
+        </div>
+        <button class="big" id="remake" disabled>Remake video</button>
+      </div>
+      <div class="quiet-row">
+        <button class="linkbtn" id="sendOnly" disabled>Just send a note to the team</button>
+        <button class="linkbtn" id="backNormal">Back to normal settings</button>
+      </div>
+      <div class="confirm-row hidden" id="normalAsk"><span>Forget the settings you saved for future videos?</span><button id="normalNo">Cancel</button><button id="normalYes">Yes, forget them</button></div>
+      <p class="muted hidden" id="normalMsg" role="status" style="text-align:center"></p>
+    </div>
+
+    <div id="panels"></div>
+
+    <div class="card" id="copyCard">
+      <h2>Titles and description</h2>
+      <p class="muted" id="copySrc" style="margin-top:0"></p>
+      <div id="copy"></div>
+      <p class="tips" style="margin:10px 0 0;text-align:left"><button class="linkbtn hidden" id="aiLink">More ways to improve these titles</button></p>
+      <div id="aiBox" class="ai hidden">
+        <h3>Want other title ideas?</h3>
+        <p>Optional. Copy this request and paste it into any chat assistant you like.</p>
+        <button id="copyPrompt" class="copybtn">Copy request</button>
+      </div>
+    </div>
+    <div class="card hidden" id="platformCard">
+      <h2>Captions for each platform</h2>
+      <p class="muted" style="margin-top:0">Same video, a caption written for each place you post it. Pick a place, copy, paste, tweak.</p>
+      <div class="opts" id="platformTabs" role="tablist" aria-label="Where you'll post" style="margin-bottom:12px"></div>
+      <div id="platforms"></div>
+    </div>
+
+    <div class="card hidden" id="ytCard">
+      <h2 id="ytHead">For your long video on YouTube</h2>
+      <p class="muted" style="margin-top:0" id="ytSrc"></p>
+      <div id="ytBody"></div>
+      <div id="ytSrtBox">
+      <a class="big secondary" id="srtLink" href="#" download style="margin-top:12px">Download captions file (.srt)</a>
+      <p class="muted" style="margin:8px 0 0">Upload this with your long video in YouTube Studio so it has captions. Your long video itself isn't changed.</p>
+      </div>
+      <div class="label" style="margin-top:18px">What to do next</div>
+      <ol class="how hidden" style="flex-direction:column;margin:0" id="ytStepsWide">
+        <li>Save your video (the captions are already in the picture).</li>
+        <li>Upload it to YouTube yourself, as you usually do.</li>
+        <li>Paste the title and description from this card.</li>
+      </ol>
+      <ol class="how" style="flex-direction:column;margin:0" id="ytStepsLong">
+        <li>Upload your long video to YouTube yourself, as you usually do.</li>
+        <li>Paste the title and description from this card.</li>
+        <li>Add the captions file under Subtitles.</li>
+        <li>Post your Shorts. In each Short's details, pick your long video under Related video.</li>
+      </ol>
+    </div>
+
+    <div class="card" id="checkCard">
+      <h2>Before you post</h2>
+      <p class="muted" style="margin-top:0">A quick look before it goes out. Tick each one as you check it.</p>
+      <div id="checkList"></div>
+      <div id="reviewNotes"></div>
+    </div>
+
+    <div class="card no-example" id="postCard">
+      <h2>Posted it?</h2>
+      <p class="muted" style="margin-top:0">Tap where you posted it. This only keeps your own record. Nothing is posted for you.</p>
+      <div class="opts" id="postBtns"></div>
+      <p class="muted" id="postMsg" role="status" style="margin:10px 0 0"></p>
+    </div>
+
+    <div class="card no-example" id="packCard">
+      <h2>Post pack</h2>
+      <p class="muted" style="margin-top:0" id="packText">One zip file with your video, a captions file, a cover picture, picture descriptions and your ready-to-paste text. You still post it yourself.</p>
+      <a class="big secondary" id="packLink" href="#" download style="margin-top:12px">Download post pack</a>
+      <p class="muted" id="packNote" style="margin:8px 0 0"></p>
+    </div>
+
+    <div class="card no-example hidden" id="shotCard">
+      <h2>Your words and your clips</h2>
+      <p class="muted" style="margin-top:0">Each line is something you say and the clip on screen while you say it. Tap a line to watch that moment. If the clip is wrong, tap Change this shot. I keep the other shots where possible; choosing an already-used clip can swap two shots. Your earlier version is kept. Match labels are suggestions from AI scores, not checked by a person.</p>
+      <ol class="shots" id="shotList"></ol>
+    </div>
+
+    <div class="card" id="didCard">
+      <h2>What I did</h2>
+      <div id="notes"></div>
+      <details class="more" id="didBox"><summary>Which clip is where</summary><div id="didList"></div></details>
+      <details class="more" id="transBox"><summary>What the captions say</summary><div id="transcript"></div></details>
+    </div>
+    <button class="big" onclick="location.reload()" style="background:var(--card);color:var(--ink);border:1px solid var(--line)">Make another video</button>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const _fetch = window.fetch;   // an expired sign-in sends her back to the login page
+window.fetch = async (...a) => { const r = await _fetch(...a); if (r.status === 401) location.href = "/login"; return r; };
+const TITLE = "Alex's Video Maker";
+const isAudio = f => /\.(m4a|mp3|wav|aac|caf|qta|opus|ogg|oga|amr|3ga|flac|aiff?|wma)$/i.test(f.name) || f.type.startsWith("audio");
+const isVideo = f => /\.(mp4|mov|m4v|3gp|webm|mkv|avi)$/i.test(f.name) || f.type.startsWith("video");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ICON = {
+  up: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>',
+  down: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>',
+  x: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  mic: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>',
+  vid: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2.5"/><path d="M16 10l5-3v10l-5-3z"/></svg>',
+};
+let clips = [], voice = null, aiPrompt = "";
+let longMode = false;      // "Shorts from a long video" instead of "A video from my clips"
+const MIN_LONG_SECONDS = 75;   // a video this short or shorter is already a Short
+let manualOrder = false;   // true once she uses the arrows: then the order on the page is used exactly as it is
+let help = "";   // whom to ask, from /api/me (empty when nobody set it)
+let demoJob = null;   // the example video from /api/demo, when there is one
+const helpSentence = () => "Need help? " + (help || "Tell the person who set this up for you.");
+const pad2 = n => String(n).padStart(2, "0");
+const mmss = s => { s = Math.round(s); return `${Math.floor(s / 60)}:${pad2(s % 60)}`; };
+const lenWords = s => s < 100 ? `${Math.round(s)} s` : mmss(s);
+const store = {   // browser memory is a convenience only: it can be blocked or empty, and nothing depends on it
+  get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (_) {} },
+};
+
+const thumbCache = new WeakMap();
+function thumbFor(file) {
+  if (thumbCache.has(file)) return thumbCache.get(file);
+  const p = new Promise(resolve => {
+    const v = document.createElement("video"), url = URL.createObjectURL(file);
+    let settled = false;
+    const end = r => { if (settled) return; settled = true; URL.revokeObjectURL(url); v.removeAttribute("src"); v.load(); resolve(r); };
+    v.muted = true; v.playsInline = true; v.preload = "metadata";
+    v.onloadedmetadata = () => { const d = v.duration || 1; v.currentTime = Math.min(Math.max(0.5, d * 0.1), 60, d / 2); };
+    v.onseeked = () => {
+      try {
+        const c = document.createElement("canvas"); c.width = 54; c.height = 96;
+        const s = Math.max(54 / v.videoWidth, 96 / v.videoHeight), w = v.videoWidth * s, h = v.videoHeight * s;
+        c.getContext("2d").drawImage(v, (54 - w) / 2, (96 - h) / 2, w, h);
+        end({ img: c.toDataURL("image/jpeg", 0.7), seconds: v.duration });
+      } catch (_) { end(null); }
+    };
+    v.onerror = () => end(null);
+    setTimeout(() => end(null), 6000);   // some phone formats (HEVC) don't play in every browser: just no picture then
+    v.src = url;
+  });
+  thumbCache.set(file, p);
+  return p;
+}
+// How long a voice recording is, read from the file itself before anything is uploaded (null when the browser can't tell)
+function audioSeconds(file) {
+  return new Promise(resolve => {
+    const a = new Audio(), url = URL.createObjectURL(file);
+    let done = false;
+    const end = r => { if (done) return; done = true; URL.revokeObjectURL(url); a.removeAttribute("src"); resolve(r); };
+    a.preload = "metadata";
+    a.onloadedmetadata = () => end(isFinite(a.duration) && a.duration > 0 ? a.duration : null);
+    a.onerror = () => end(null);
+    setTimeout(() => end(null), 5000);
+    a.src = url;
+  });
+}
+const clipSecs = new WeakMap();   // file -> seconds, or -1 when the browser couldn't read it
+let voiceSecs;                    // undefined while it is being read, null when unknown
+
+let notes = [];
+const byName = (a, b) => a.name.localeCompare(b.name, undefined, { numeric: true });
+// New clips: in the order they were filmed when the phone's dates are trustworthy and clearly spread out, else by name.
+function sortFresh(fresh) {
+  const named = [...fresh].sort(byName);
+  const t = fresh.map(f => f.lastModified);
+  const spread = Math.max(...t) - Math.min(...t);
+  const trusted = fresh.length > 1 && new Set(t).size === t.length && Math.min(...t) > Date.UTC(2005, 0, 1) && spread >= 30000;
+  if (!trusted) return named;
+  const timed = [...fresh].sort((a, b) => a.lastModified - b.lastModified);
+  if (timed.some((f, i) => f !== named[i])) notes.push("I put your new clips in the order you filmed them. Use the arrows if that isn't right.");
+  return timed;
+}
+function whyNot(f) {
+  const ext = (f.name.match(/\.[^.]+$/) || [""])[0].toLowerCase();
+  if (ext === ".zip") return `${f.name} is a zip file. Unzip it first, then pick the videos inside.`;
+  if (/\.(heic|heif|jpe?g|png|gif|webp)$/.test(ext)) return `${f.name} is a photo. I can only use videos.`;
+  if (!ext) return `${f.name} looks like a folder. Open it and pick the videos inside.`;
+  return `I can't use ${f.name}. It isn't a video or a voice recording I recognise.`;
+}
+function addFiles(list) {
+  notes = [];
+  const fresh = [];
+  for (const f of [...list]) {
+    if (f.name.startsWith(".")) continue;   // hidden system files that come along with a folder
+    if (isVideo(f) && f.size === 0 || isAudio(f) && f.size === 0) { notes.push(`${f.name} is empty (0 bytes). Check that it opens on your phone, then add it again.`); continue; }
+    if (isAudio(f) && !isVideo(f)) {
+      if (longMode) { notes.push(`${f.name} is a voice recording. It isn't used for Shorts from a long video, so I left it out.`); continue; }
+      if (voice && !(voice.name === f.name && voice.size === f.size)) notes.push(`Only one voice-over is used, so ${f.name} replaced ${voice.name}.`);
+      recState = "idle"; setVoice(f);
+    } else if (isVideo(f)) {
+      const same = x => x.name === f.name && x.size === f.size;
+      if (clips.some(same) || fresh.some(same)) notes.push(`${f.name} is already in your list, so I left the second copy out.`);
+      else fresh.push(f);
+    } else notes.push(whyNot(f));
+  }
+  const ordered = sortFresh(fresh);
+  clips = clips.length ? clips.concat(ordered) : ordered;   // new clips go on the end: the order she set stays put
+  render();
+}
+// A voice-over she picked or recorded. Its length is read now so she sees it before uploading.
+function setVoice(f, knownSeconds) {
+  voice = f; voiceSecs = knownSeconds;
+  if (recUrl && recState !== "review") { URL.revokeObjectURL(recUrl); recUrl = null; }
+  if (f && knownSeconds === undefined) audioSeconds(f).then(s => { if (voice === f) { voiceSecs = s; render(); } });
+}
+
+function updateLength() {
+  const line = $("lenLine"), vline = $("voiceLine");
+  const cs = clips.map(f => clipSecs.get(f));
+  const known = clips.length && cs.every(x => x !== undefined && x >= 0);
+  let text = "", warn = false;
+  if (clips.length > 20 && !wideVideo()) { text = `That's ${clips.length} clips. A video is under 60 seconds, so I may only use part of some of them.`; warn = true; }
+  else if (known) {
+    const c = cs.reduce((a, b) => a + b, 0);
+    if (voice && voiceSecs > 0) {
+      text = `Clips ${lenWords(c)}, voice-over ${lenWords(voiceSecs)}.`;
+      if (c < voiceSecs - 1) { text += " Your clips are shorter than your voice-over, so the last picture will be held at the end. Add another clip to cover it."; warn = true; }
+      else if (c > voiceSecs * 6) { text += " You have a lot more footage than voice-over, so I'll only use part of each clip."; warn = true; }
+    } else if (!voice) {
+      text = `Clips ${lenWords(c)} in total.` + (wideVideo() ? (c > 900 ? " A YouTube video made here accepts up to 15 minutes of clips. Split longer recordings into shorter videos before adding them." : "")
+        : c > 60 ? " Videos are 60 seconds at most, so a long one is split into parts." : "");
+    }
+  }
+  line.textContent = text; line.classList.toggle("hidden", !text); line.classList.toggle("warn", warn);
+  const vtxt = voice && (wideVideo() ? voiceSecs > 900 : voiceSecs > 55) ? wideVideo() ? `A YouTube video made here is 15 minutes at most. Your voice-over is ${lenWords(voiceSecs)}. I trim the pauses, but it may still be too long.` : `Videos are 60 seconds at most. Your voice-over is ${lenWords(voiceSecs)}. I trim the pauses, but it may still be too long.` : "";
+  vline.textContent = vtxt; vline.classList.toggle("hidden", !vtxt); vline.classList.toggle("warn", !!vtxt);
+  refreshGate();
+}
+
+// ---- Shorts from a long video: the number, the time, and what stops her ----
+function shortsValue(raw) {
+  const t = String(raw ?? "").trim();
+  if (!/^\d+$/.test(t)) return null;
+  const n = +t;
+  return n >= 1 && n <= 5 ? n : null;
+}
+const shortsCount = () => shortsValue($("shortsN").value);
+function longProblem() {
+  if (clips.length > 1) return ["Pick just one long video for this. Take the others out with the X, or use A video from my clips.", true];
+  const s = clips.length === 1 ? clipSecs.get(clips[0]) : undefined;
+  if (s !== undefined && s >= 0 && s <= MIN_LONG_SECONDS) return ["This video is short enough to be a Short already. Use A video from my clips.", true];
+  if (shortsCount() === null) return ["How many Shorts? Pick a number from 1 to 5.", false];
+  return ["", false];
+}
+// seconds = 0.22 x the video's length + 60 per Short + 20 (measured on this computer)
+const longMinutes = (len, n) => Math.max(2, Math.ceil((0.22 * len + 60 * n + 20) / 60));
+function longTimeText() {
+  const n = shortsCount() || 3, s = clips.length === 1 ? clipSecs.get(clips[0]) : undefined;
+  const m = x => `${x} minute${x === 1 ? "" : "s"}`;
+  if (s > 0) return `Your video is ${lenWords(s)} long, so this takes about ${m(longMinutes(s, n))}, plus the time to upload it. You can leave this page and come back.`;
+  return `A 10 minute video takes about ${m(longMinutes(600, n))}. You can leave this page and come back.`;
+}
+function refreshGate() {
+  let msg = !clips.length ? "Add at least one video clip." : "", toClips = false;
+  if (longMode) {
+    $("longTime").textContent = longTimeText();
+    $("longVoiceNote").classList.toggle("hidden", !voice);
+    if (!clips.length) msg = "Add your long video.";
+    else { const [m, sw] = longProblem(); msg = m; toClips = sw; }
+  }
+  $("pickErr").textContent = msg;
+  $("toClips").classList.toggle("hidden", !(longMode && toClips));
+  $("go").disabled = !clips.length || recState === "recording" || (longMode && !!longProblem()[0]);
+}
+function setMode(long) {
+  longMode = !!long;
+  document.body.classList.toggle("long", longMode);
+  $("modeClipsL").classList.toggle("on", !longMode);
+  $("modeLongL").classList.toggle("on", longMode);
+  document.querySelector(`input[name="mode"][value="${longMode ? "long" : "clips"}"]`).checked = true;
+  $("how1").innerHTML = longMode ? "<b>Add</b> your finished long video" : "<b>Add</b> your clips, and a voice-over if you have one";
+  $("how2").innerHTML = longMode ? "<b>Make</b> your Shorts. A long video takes a few minutes" : "<b>Make</b> your video. It takes a few minutes";
+  $("how3").innerHTML = longMode ? "<b>Review</b> the Shorts and the YouTube post" : "<b>Review</b> it and ask for any changes";
+  $("how4").innerHTML = longMode ? "<b>Save</b> them and copy the titles" : "<b>Save</b> it and copy the captions";
+  $("tipLong").textContent = longMode ? "One video, a few minutes or longer." : "Over a minute? I split it into parts.";
+  $("subLine").textContent = longMode ? "Pick a finished long video. Get Shorts back, plus the YouTube post for it."
+    : "Add your phone clips and, if you like, a voice-over. Get back a finished vertical video and a caption for each place you post.";
+  $("go").textContent = longMode ? "Make my Shorts" : "Make my video";
+  $("readyLine").textContent = longMode ? "Tap Make my Shorts when your long video is in." : "Tap Make my video when your clips are in order.";
+  $("listLabel").textContent = longMode ? "Your long video" : "Clips, in play order";
+  render();
+  setShape();
+}
+document.querySelectorAll('input[name="mode"]').forEach(r => r.onchange = () => setMode(r.value === "long"));
+// Social video (vertical, the default) or YouTube video (horizontal). Shorts from a long video are always upright.
+function wideVideo() { return !longMode && $("shapeHL").querySelector("input").checked; }
+function setShape() {
+  const wide = $("shapeHL").querySelector("input").checked;
+  $("shapeVL").classList.toggle("on", !wide); $("shapeHL").classList.toggle("on", wide);
+  $("tallFillL").classList.toggle("hidden", !wide);
+  if (!longMode) {
+    $("subLine").textContent = wide ? "Add your clips and, if you like, a voice-over. Get back a finished horizontal YouTube video, with a title and description."
+      : "Add your phone clips and, if you like, a voice-over. Get back a finished vertical video and a caption for each place you post.";
+    $("tipLong").textContent = wide ? "Up to 15 minutes of clips. Split longer recordings before adding them." : "Over a minute? I split it into parts.";
+  }
+  updateLength();
+}
+document.querySelectorAll('input[name="shape"]').forEach(r => r.onchange = setShape);
+$("toClips").onclick = () => setMode(false);
+$("shortsN").oninput = refreshGate;
+
+function render() {
+  const any = clips.length || voice;
+  $("pickNote").textContent = notes.join(" ");
+  $("pickNote").classList.toggle("hidden", !notes.length);
+  $("list").classList.toggle("hidden", !any);
+  $("tips").classList.toggle("hidden", !!any);
+  $("how").classList.toggle("hidden", !!any);
+  $("ideasWrap").classList.toggle("hidden", !!any);
+  $("exampleWrap").classList.toggle("hidden", !!any || !demoJob);
+  $("drop").classList.toggle("compact", !!any);
+  $("dropTitle").innerHTML = longMode ? (any ? "Change the video" : '<span class="phone-only">Add your long video</span><span class="wide-only">Drop your long video here</span>')
+    : any ? "+ Add more clips" : '<span class="phone-only">Add your clips</span><span class="wide-only">Drop your files here</span>';
+  $("dropHint").classList.toggle("hidden", longMode);
+  $("clips").innerHTML = "";
+  clips.forEach((f, i) => {
+    const li = document.createElement("li");
+    li.className = "clip";
+    li.innerHTML = `<div class="cthumb" aria-hidden="true">${ICON.vid}</div>
+      <div class="who"><b>${longMode ? esc(f.name) : "Clip " + (i + 1)}</b><div class="sub"><span class="fname">${longMode ? "Your long video" : esc(f.name)}</span><span class="dur"></span></div></div>
+      <button class="icon-btn" aria-label="Move clip ${i + 1} up" ${i ? "" : "disabled"}>${ICON.up}</button>
+      <button class="icon-btn" aria-label="Move clip ${i + 1} down" ${i < clips.length - 1 ? "" : "disabled"}>${ICON.down}</button>
+      <button class="icon-btn" aria-label="Remove clip ${i + 1}">${ICON.x}</button>`;
+    const [up, down, del] = li.querySelectorAll("button");
+    thumbFor(f).then(t => {   // what the clip looks like and how long it is: so she can tell clips apart. A plain video icon stays if the browser can't read it
+      clipSecs.set(f, t && isFinite(t.seconds) ? t.seconds : -1);
+      if (t && li.isConnected) {
+        const img = document.createElement("img");
+        img.className = "cthumb"; img.alt = ""; img.src = t.img;
+        li.querySelector(".cthumb").replaceWith(img);
+        li.querySelector(".dur").textContent = mmss(t.seconds);
+      }
+      updateLength();
+    });
+    up.onclick = () => { manualOrder = true; [clips[i - 1], clips[i]] = [clips[i], clips[i - 1]]; render(); };
+    down.onclick = () => { manualOrder = true; [clips[i + 1], clips[i]] = [clips[i], clips[i + 1]]; render(); };
+    del.onclick = () => { clips.splice(i, 1); render(); };
+    $("clips").appendChild(li);
+  });
+  if (!clips.length) { $("clips").innerHTML = '<li class="muted">No clips yet</li>'; manualOrder = false; }
+  $("orderHelp").classList.toggle("hidden", clips.length < 2);
+  $("orderHelp").textContent = manualOrder ? "Using the order you set here."
+    : "I'll put your clips in the order you filmed them, so you don't need to number or sort them. Use the arrows only if you want a different order.";
+  const mv = $("moveLine");
+  mv.textContent = $("private").checked ? "Nothing is moved to match your words: your clips stay in the order shown."
+    : "If you talk about a clip in your voice-over, I may move it to where you mention it. After your first video you can switch that off with Keep my clip order.";
+  mv.classList.toggle("hidden", !(voice && clips.length > 1));
+  if (recState !== "recording") drawVoice();
+  updateLength();
+  refreshGate();
+}
+
+// ---- voice-over: a file she picks, or one she records right here ----
+const canRecord = !!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.isSecureContext !== false);
+let recState = "idle", recorder = null, recStream = null, recChunks = [], recTick = null, recStart = 0, recUrl = null, recMsg = "";
+const recMime = () => { for (const t of ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"]) { try { if (MediaRecorder.isTypeSupported(t)) return t; } catch (_) {} } return ""; };
+function drawVoice() {
+  const box = $("voice");
+  box.className = "voice clips-only" + (voice || recState === "recording" ? "" : " missing");
+  if (recState === "recording") {
+    box.innerHTML = `<div class="rec"><span class="dot" aria-hidden="true"></span><span class="time" id="recTime">0:00</span><button id="recStop" class="big" style="margin:0;width:auto;padding:0 20px;min-height:44px">Stop</button></div><div class="vtext" id="recNote" role="status"></div>`;
+    $("recStop").onclick = () => stopRecording(false);
+    return;
+  }
+  if (voice) {
+    const own = recState === "review";
+    const len = voiceSecs > 0 ? mmss(voiceSecs) : "";
+    box.innerHTML = `${ICON.mic}<div class="vtext">${own ? "Your recording" : esc(voice.name)}<small>${len}</small></div>
+      ${own ? '<button id="recRedo">Record again</button>' : ""}<button class="icon-btn" id="rmVoice" aria-label="Remove voice-over">${ICON.x}</button>${own && recUrl ? `<audio controls src="${recUrl}" preload="metadata"></audio>` : ""}`;
+    $("rmVoice").onclick = () => { recState = "idle"; recMsg = ""; setVoice(null); render(); };
+    if (own) $("recRedo").onclick = () => { recState = "idle"; setVoice(null); startRecording(); };
+    return;
+  }
+  box.innerHTML = `<p>No voice-over. We'll use the sound recorded in your clips.</p><div class="vbtns">${canRecord ? '<button id="recGo">' + ICON.mic + '<span>Record my voice-over</span></button>' : ""}<button id="voicePick">Choose a voice recording</button></div>${canRecord && !recMsg ? '<p class="muted" id="micHint" style="margin:8px 0 0;font-size:13px">Your phone will ask to use the microphone. Tap Allow.</p>' : ""}${recMsg ? `<p class="help-line warn" role="alert" style="margin-top:10px">${esc(recMsg)}</p>` : ""}`;
+  if (canRecord) $("recGo").onclick = startRecording;
+  $("voicePick").onclick = () => $("voiceFile").click();
+}
+async function startRecording() {
+  recMsg = "";
+  try {
+    recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (_) {
+    recMsg = "I couldn't use the microphone. Allow it in your browser's settings and try again, or choose a voice recording instead.";
+    return render();
+  }
+  const mime = recMime();
+  try { recorder = new MediaRecorder(recStream, mime ? { mimeType: mime } : undefined); }
+  catch (_) { recStream.getTracks().forEach(t => t.stop()); recMsg = "This browser can't record here. Choose a voice recording instead."; return render(); }
+  const mine = recorder;
+  recChunks = [];
+  mine.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
+  mine.onstop = () => {
+    clearInterval(recTick); recStream.getTracks().forEach(t => t.stop());
+    if (mine._discard) return;
+    const type = mine.mimeType || mime || "audio/webm";
+    const ext = /mp4|aac/.test(type) ? ".m4a" : /ogg/.test(type) ? ".ogg" : ".webm";
+    const blob = new Blob(recChunks, { type }), secs = (Date.now() - recStart) / 1000;
+    if (recUrl) URL.revokeObjectURL(recUrl);
+    recUrl = URL.createObjectURL(blob);
+    recState = "review";
+    setVoice(new File([blob], "Voice recording" + ext, { type }), secs);
+    render();
+  };
+  recState = "recording"; recStart = Date.now();
+  mine.start(1000);
+  drawVoice(); render();   // render() leaves the row alone while recording, so draw the recording row once here
+  recTick = setInterval(() => {
+    const s = Math.floor((Date.now() - recStart) / 1000);
+    if ($("recTime")) $("recTime").textContent = `${Math.floor(s / 60)}:${pad2(s % 60)}`;
+    if ($("recNote")) $("recNote").textContent = s >= 55 ? "That's about a minute. A video is 60 seconds at most, so you may want to stop soon." : "";
+    if (s >= 300) stopRecording(false);
+  }, 500);
+}
+function stopRecording(discard) {
+  if (!recorder || recState !== "recording") return;
+  recorder._discard = !!discard;
+  clearInterval(recTick);
+  try { recorder.stop(); } catch (_) {}
+  if (discard) { recStream.getTracks().forEach(t => t.stop()); recState = "idle"; }
+}
+
+const drop = $("drop");
+// A dropped folder is opened and its videos picked out (a phone or a plain file picker gives files directly)
+function readAll(entry) {
+  return new Promise(resolve => {
+    if (entry.isFile) return entry.file(f => resolve([f]), () => resolve([]));
+    if (!entry.isDirectory) return resolve([]);
+    const reader = entry.createReader(), out = [];
+    const more = () => reader.readEntries(async batch => {
+      if (!batch.length) return resolve(out);
+      for (const e of batch) out.push(...await readAll(e));
+      if (out.length > 300) return resolve(out);
+      more();
+    }, () => resolve(out));
+    more();
+  });
+}
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", async e => {
+  e.preventDefault(); drop.classList.remove("over");
+  const dt = e.dataTransfer;
+  const entries = [...(dt.items || [])].map(i => i.webkitGetAsEntry ? i.webkitGetAsEntry() : null);   // must be read right now, before any waiting
+  const plain = [...(dt.files || [])];
+  if (!entries.length || entries.some(x => !x) || !entries.some(x => x.isDirectory)) return addFiles(plain);
+  const lists = await Promise.all(entries.map(readAll));
+  addFiles(lists.flat());
+});
+$("files").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+$("voiceFile").onchange = e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  notes = [];
+  if (f.size === 0) notes.push(`${f.name} is empty (0 bytes). Check that it opens on your phone, then add it again.`);
+  else {
+    if (voice && !(voice.name === f.name && voice.size === f.size)) notes.push(`Only one voice-over is used, so ${f.name} replaced ${voice.name}.`);
+    recState = "idle"; setVoice(f);
+  }
+  render();
+};
+$("private").onchange = render;
+function clearAll() {
+  clips = []; notes = []; recMsg = ""; recState = "idle"; setVoice(null);
+  $("hints").value = ""; $("private").checked = false;
+  $("resetAsk").classList.add("hidden"); $("reset").classList.remove("hidden");
+  render();
+}
+$("reset").onclick = () => { $("reset").classList.add("hidden"); $("resetAsk").classList.remove("hidden"); $("resetNo").focus(); };
+$("resetNo").onclick = () => { $("resetAsk").classList.add("hidden"); $("reset").classList.remove("hidden"); };
+$("resetYes").onclick = clearAll;
+
+// ---- time on the working screen ----
+let workStart = 0, workClock = null;
+function clock() {
+  const s = Math.max(0, Math.floor((Date.now() - workStart) / 1000));
+  $("elapsed").textContent = `Working for ${Math.floor(s / 60)}:${pad2(s % 60)}`;
+}
+function show(id) {
+  for (const s of ["pick", "working", "failed", "done"]) $(s).classList.toggle("hidden", s !== id);
+  $("hdr").classList.toggle("hidden", id === "done");   // the video is the first thing she sees on the result
+  $("navNew").classList.toggle("cur", id !== "done");
+  if (id === "working" && !workClock) { workStart = Date.now(); clock(); workClock = setInterval(clock, 1000); }
+  if (id !== "working" && workClock) { clearInterval(workClock); workClock = null; }
+  window.scrollTo({ top: 0 });
+}
+
+const STEPS_CLIPS = [
+  ["upload", "Uploading your files"], ["1/6", "Listening to what you say"], ["2/6", "Trimming the pauses"],
+  ["3/6", "Lining up your clips"], ["4/6", "Adding captions"], ["5/6", "Adding music"],
+  ["Rendering", "Putting it all together"], ["6/6", "Writing titles"],
+];
+// Shorts from a long video: the engine's own six stages, named for what happens to her long video
+const STEPS_LONG = [
+  ["upload", "Uploading your files"], ["1/6", "Listening to your whole video"], ["2/6", "Choosing the best moments"],
+  ["3/6", "Cutting your Shorts out"], ["4/6", "Making your Shorts"], ["5/6", "Gathering your Shorts"],
+  ["6/6", "Writing the YouTube post"],
+];
+let STEPS = STEPS_CLIPS;
+function useSteps(list) {
+  if (STEPS === list && $("steps").children.length) return;
+  STEPS = list;
+  $("steps").innerHTML = STEPS.map(([, t]) => `<li><span class="dot"></span>${t}</li>`).join("");
+}
+useSteps(STEPS_CLIPS);
+function setStep(idx, label, fraction, idle) {
+  idx = Math.max(0, Math.min(idx, STEPS.length - 1));
+  // idle: nothing has started yet. The upload is done, no step is spinning, and the bar waits instead of sitting empty
+  [...$("steps").children].forEach((li, i) => li.className = idle ? (i === 0 ? "done" : "") : i < idx ? "done" : i === idx ? "active" : "");
+  $("barFill").parentNode.classList.toggle("wait", !!idle);
+  $("step").textContent = (label || STEPS[idx][1]) + "…";
+  const f = typeof fraction === "number" ? fraction : idx / STEPS.length;
+  $("barFill").style.width = Math.round(Math.max(0, Math.min(1, f)) * 100) + "%";
+}
+
+// ---- resumable upload: small pieces, each retried on its own, the screen kept awake ----
+let uploading = false, wakeLock = null;
+async function keepAwake(on) {
+  try {
+    if (on && "wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
+    else if (wakeLock) { await wakeLock.release(); wakeLock = null; }
+  } catch (_) {}
+}
+document.addEventListener("visibilitychange", () => { if (uploading && document.visibilityState === "visible") keepAwake(true); });
+window.addEventListener("beforeunload", e => { if (uploading) { e.preventDefault(); e.returnValue = ""; } });
+const pause = ms => new Promise(r => setTimeout(r, ms));
+const backOnline = () => navigator.onLine ? Promise.resolve() : new Promise(r => addEventListener("online", r, { once: true }));
+const mb = n => (n / 1048576).toFixed(n > 1e8 ? 0 : 1) + " MB";
+
+function putPiece(url, blob, onBytes) {
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open("PUT", url);
+    x.upload.onprogress = e => e.lengthComputable && onBytes(e.loaded);
+    x.onload = () => { let j = {}; try { j = JSON.parse(x.responseText || "{}"); } catch (_) {} resolve({ status: x.status, json: j }); };
+    x.onerror = x.ontimeout = () => reject(new Error("network"));
+    x.send(blob);
+  });
+}
+
+async function sendFile(jobId, spec, file, chunk, base, total) {
+  let at = spec.received;
+  const show_ = (extra = 0) => setStep(0, `Uploading ${spec.index} of ${spec.count}, ${Math.round((base + at + extra) / total * 100)}% (${mb(base + at + extra)} of ${mb(total)}). Keep this page open`);
+  while (at < file.size) {
+    let tries = 0;
+    for (;;) {
+      await backOnline();
+      try {
+        const r = await putPiece(`/api/uploads/${jobId}/${spec.slot}?offset=${at}`, file.slice(at, Math.min(at + chunk, file.size)), n => show_(n));
+        if (r.status === 200) { at = r.json.received; show_(); break; }
+        if (r.status === 409) { at = r.json.received; show_(); break; }   // out of step: carry on from where the server is
+        if (r.status === 401) { location.href = "/login"; throw new Error("sign-in expired"); }
+        if (r.status >= 500) throw new Error("server");
+        throw new Error(r.json.detail || "The upload was refused.");
+      } catch (e) {
+        if (e.message !== "network" && e.message !== "server") throw e;
+        if (++tries > 8) throw new Error("Your connection kept dropping, so the upload stopped. Your files are still here: tap Make my video to carry on.");
+        setStep(0, `Connection dropped. Trying again (${tries})`);
+        await pause(Math.min(1000 * 2 ** tries, 15000));
+        // ask the server where it got to, in case the piece landed but the reply didn't
+        try { const p = await (await fetch(`/api/uploads/${jobId}`)).json(); at = p.slots.find(x => x.slot === spec.slot).received; } catch (_) {}
+        if (at >= file.size) break;
+      }
+    }
+  }
+}
+
+async function postJSON(url, body, tries = 1) {
+  for (let i = 1; ; i++) {
+    try {
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+      return { ok: r.ok, status: r.status, json: await r.json().catch(() => ({})) };
+    } catch (_) {
+      if (i >= tries) throw new Error("The Video Maker computer isn't answering right now. Your files are still here. Try again in a minute. " + helpSentence());
+      await pause(2000 * i);
+    }
+  }
+}
+
+$("go").onclick = async () => {
+  show("working");
+  $("safeLine").classList.add("hidden");
+  $("waitNote").textContent = "Keep this page open until the upload is finished.";
+  useSteps(longMode ? STEPS_LONG : STEPS_CLIPS);
+  setStep(0, "Checking your files");
+  uploading = true; keepAwake(true);
+  try {
+    const file = f => ({ name: f.name, size: f.size });
+    const start = await postJSON("/api/uploads", {
+      clips: clips.map(file), voice: voice && !longMode ? file(voice) : null, denoise: $("denoise").checked, manual_order: manualOrder, music_duck: $("musicDuck").checked,
+      hints: $("hints").value.trim() || null, format: longMode ? "auto" : $("kind").value || "auto", private: longMode ? false : $("private").checked,
+      highlights: longMode ? shortsCount() : null, music: TRACKS.length ? uploadMusic || "auto" : null,
+      orientation: wideVideo() ? "horizontal" : "vertical", tall_clips: wideVideo() && $("tallFill").checked ? "fill" : "bars",
+    });
+    if (!start.ok) return fail(start.json.detail || "I couldn't start the upload. Please try again.");
+    const { job_id, slots, chunk } = start.json;
+    const files = [...clips, ...(voice && !longMode ? [voice] : [])];
+    const total = files.reduce((a, f) => a + f.size, 0);
+    let done = 0;
+    for (let i = 0; i < files.length; i++) {
+      await sendFile(job_id, { ...slots[i], index: i + 1, count: files.length }, files[i], chunk, done, total);
+      done += files[i].size;
+    }
+    setStep(0, "Saving your files");
+    const fin = await postJSON(`/api/uploads/${job_id}/finish`, {}, 6);
+    if (!fin.ok) return fail(fin.json.detail || "I couldn't start making your video. Please try again.");
+    store.set("lastJob", job_id);
+    uploading = false; keepAwake(false);
+    poll(job_id);
+  } catch (e) {
+    fail(e.message);
+  } finally {
+    uploading = false; keepAwake(false);
+  }
+};
+
+// Ask how the video is getting on. A few "can't find it" answers in a row end the waiting with a plain message,
+// but a dropped connection or a busy site just tries again.
+async function poll(id, misses = 0) {
+  let res, r;
+  try { res = await fetch(`/api/jobs/${id}`); r = await res.json().catch(() => null); } catch (_) { return setTimeout(() => poll(id, misses), 3000); }
+  if (!r || !r.status) {
+    if (res.status === 404 || (r && r.detail && res.status < 500)) {
+      if (misses + 1 >= 3) return fail("We can't find that video any more. Please add your clips again.");
+      return setTimeout(() => poll(id, misses + 1), 2000);
+    }
+    return setTimeout(() => poll(id, misses), 3000);
+  }
+  if (r.status === "failed") return fail(r.error, r.can_retry ? id : null);
+  if (r.status !== "done") {
+    useSteps(r.long ? STEPS_LONG : STEPS_CLIPS);
+    const L = r.long;
+    if (typeof r.working_seconds === "number") { workStart = Date.now() - r.working_seconds * 1000; clock(); }   // time since it really started, even after she comes back
+    const ahead = r.ahead > 0
+      ? `${r.ahead} other video${r.ahead > 1 ? "s are" : " is"} being made first. Yours starts as soon as ${r.ahead > 1 ? "they're" : "it's"} done.` : "";
+    const thenAbout = m => (ahead && m ? ` Then about ${m} minute${m > 1 ? "s" : ""} for yours. You can leave this page and come back.` : "");
+    if (L) {   // Shorts from a long video: a long wait that must never look stuck
+      const queued = r.status === "queued";
+      const idx = Math.max(1, Math.min(L.stage || 1, STEPS.length - 1));
+      const left = L.minutes_left || L.estimate_minutes || 3;
+      let label = queued ? "Waiting for the last video to finish" : STEPS[idx][1];
+      if (!queued && !L.stage) label = "Getting your video ready";
+      else if (!queued && L.stage === 1 && L.heard && L.heard_of) label = `Listening to your whole video (${mmss(L.heard)} of ${mmss(L.heard_of)})`;
+      else if (!queued && L.stage === 4 && L.short) label = `Making Short ${L.short} of ${L.of}`;
+      const idle = queued || !L.stage;
+      setStep(queued ? 1 : idx, label, idle ? 0 : L.progress, idle);
+      $("waitNote").textContent = ahead ? ahead + thenAbout(L.estimate_minutes)
+        : `About ${left} minute${left > 1 ? "s" : ""} to go. A long video takes a while. You can leave this page and come back.`;
+      $("safeLine").innerHTML = `<b>Safe to close this page.</b> Your Shorts will be in <a href="/videos">My videos</a>.`;
+      document.title = "Making your Shorts… · " + TITLE;
+    } else {
+      const idx = STEPS.findIndex(([k]) => (r.step || "").includes(k));
+      setStep(idx > 0 ? idx : 1, idx > 0 ? null : r.status === "queued" ? "Waiting for the last video to finish" : null);
+      document.title = "Making your video… · " + TITLE;
+      $("safeLine").innerHTML = `<b>Safe to close this page.</b> Your video will be in <a href="/videos">My videos</a>.`;
+      $("waitNote").textContent = ahead ? ahead + thenAbout(r.eta_minutes) : `Usually about ${r.eta_minutes || 3} minutes (a rough guess).`;
+    }
+    $("safeLine").classList.remove("hidden");
+    return setTimeout(() => poll(id), 2000);
+  }
+  store.del("lastJob");
+  document.title = (r.report && r.report.mode === "highlights" ? "✓ Your Shorts are ready · " : "✓ Your video is ready · ") + TITLE;
+  finish(id, r);
+}
+
+function fail(msg, again) {
+  document.title = TITLE;
+  store.del("lastJob");
+  $("failMsg").textContent = msg || "Something went wrong. Please try again.";
+  $("helpLine").textContent = helpSentence();
+  // Nothing she picked is thrown away: her clips, their order and her voice-over are still in the list
+  const kept = clips.length > 0, hadVideo = !kept && !!jobId;
+  $("failKept").textContent = kept && longMode ? "Your long video is still here."
+    : kept ? `Your ${clips.length} clip${clips.length > 1 ? "s" : ""}${voice ? " and voice-over" : ""} ${clips.length > 1 || voice ? "are" : "is"} still here, in the order you set.`
+    : hadVideo ? "Your last video is still here." : "";
+  $("retry").textContent = kept ? "Back to my clips" : hadVideo ? "Back to my video" : "Start again";
+  $("retry").onclick = () => kept ? show("pick") : hadVideo ? show("done") : location.reload();
+  // The site restarted, or it crashed on our side: the files are still saved, so offer to start over without uploading again
+  $("again").classList.toggle("hidden", !again);
+  $("again").disabled = false;
+  $("again").onclick = async () => {
+    $("again").disabled = true;
+    try {
+      const r = await fetch(`/api/jobs/${again}/retry`, { method: "POST" });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { $("failMsg").textContent = j.detail || "I couldn't start it again. Please add your clips again."; $("again").disabled = false; return; }
+      store.set("lastJob", j.job_id);
+      show("working"); setStep(1); poll(j.job_id);
+    } catch (_) { $("again").disabled = false; }
+  };
+  show("failed");
+}
+
+// ---------- the result page ----------
+const PLATFORMS = [["youtube_shorts", "YouTube Shorts"], ["tiktok", "TikTok"], ["instagram_reels", "Instagram Reels"], ["facebook_reels", "Facebook Reels"]];
+const PLATFORM_LONG = ["youtube_long", "YouTube long video"];   // only for Shorts-from-a-long-video results (it has its own YouTube post)
+const FORMAT_NAMES = { house_tour: "House tour", recipe: "Recipe", tips: "Tips", market_update: "Market update", qa: "Question and answer" };
+const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+const fileMB = x => x >= 100 ? `${Math.round(x)} MB` : x >= 10 ? `${x.toFixed(0)} MB` : `${x.toFixed(1)} MB`;
+const secs = s => !Number.isFinite(+s) ? "" : s >= 60 ? `${Math.floor(s / 60)} min ${Math.round(s % 60)}s` : `${Math.round(s)}s`;
+let R = null;   // the finished video on screen: { id, r, parts }
+
+// A note for the team's records (what she copied, saved or posted). Fire and forget: it never slows or stops anything.
+function logEvent(kind, platform) {
+  if (!jobId) return;
+  try { fetch(`/api/jobs/${jobId}/event`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, platform: platform || null }) }).catch(() => {}); } catch (_) {}
+}
+
+// Copy to the clipboard. If the browser won't allow it, try the old way, and failing that select the text so she can copy it by hand.
+async function copyText(text, node) {
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); return true; } } catch (_) {}
+  try {
+    const t = document.createElement("textarea");
+    t.value = text; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(t); t.select(); t.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy"); t.remove();
+    if (ok) return true;
+  } catch (_) {}
+  if (node) { try { const g = document.createRange(); g.selectNodeContents(node); const s = getSelection(); s.removeAllRanges(); s.addRange(g); } catch (_) {} }
+  return false;
+}
+function copyButton(b, text, node, hint, platform) {
+  b.onclick = async () => {
+    const ok = await copyText(text, node);
+    clearTimeout(b._t);
+    if (ok) { b.textContent = "Copied ✓"; b.classList.add("copied"); hint.textContent = ""; logEvent("copy", platform); }
+    else { b.textContent = "Copy"; b.classList.remove("copied"); hint.textContent = "Your phone wouldn't copy it. Press and hold the text to copy it."; }
+    b._t = setTimeout(() => { b.textContent = "Copy"; b.classList.remove("copied"); hint.textContent = ""; }, ok ? 2500 : 7000);
+  };
+}
+function field(label, text, cls = "", platform = null) {
+  const wrap = el("div", "field " + cls, `<div class="top"><div class="label"></div><button class="copybtn">Copy</button></div><div class="text"></div><div class="copyhint" role="status" aria-live="polite"></div>`);
+  wrap.querySelector(".label").textContent = label;
+  wrap.querySelector(".text").textContent = text;
+  copyButton(wrap.querySelector("button"), text, wrap.querySelector(".text"), wrap.querySelector(".copyhint"), platform);
+  return wrap;
+}
+function tabs(box, items, current, onPick) {   // a row of buttons where one is chosen: [[key, label], ...]
+  box.innerHTML = "";
+  items.forEach(([k, label]) => {
+    const b = el("button", "tab"); b.textContent = label; b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", String(k === current)); b.dataset.k = k;
+    b.onclick = () => { box.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === b))); onPick(k); };
+    box.appendChild(b);
+  });
+}
+
+// Jump a player to a moment in the video (seconds in that part), show it and start it
+function seekTo(at, part = 1) {
+  const v = document.querySelectorAll("#players video")[Math.max(0, part - 1)];
+  if (!v) return;
+  const go = () => { try { v.currentTime = Math.max(0, at); } catch (_) {} v.scrollIntoView({ behavior: "smooth", block: "center" }); const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  if (v.readyState >= 1) go(); else { v.addEventListener("loadedmetadata", go, { once: true }); v.load(); }
+}
+
+// her clip names: the engine reports "03.mp4" for her third clip; she sees "Clip 3 (Kitchen.mov)"
+function clipNumber(name) {
+  const m = /^Clip (\d+)/.exec(name) || /^0*(\d+)\.[A-Za-z0-9]+$/.exec(name);
+  return m ? +m[1] : null;
+}
+function herName(name) {
+  if (/^Clip \d+/.test(name)) return name;
+  const n = clipNumber(name), c = n && clipNames.find(x => x.n === n);
+  return c ? `Clip ${n} (${c.name})` : n ? `Clip ${n}` : name;
+}
+
+function finish(id, r) {
+  show("done");
+  jobId = r.example ? null : id;   // the example video belongs to nobody: nothing may be sent about it
+  document.body.classList.toggle("example", !!r.example);
+  $("exampleBar").classList.toggle("hidden", !r.example);
+  const rep = r.report, parts = rep.parts || [{ file: "final.mp4", length: rep.length }], many = parts.length > 1;
+  const hl = rep.mode === "highlights";   // one long video cut into Shorts (not a long video split in parts)
+  R = { id, r, parts, many, hl };
+  $("readyTitle").textContent = hl ? "Your Shorts are ready" : "Your video is ready";
+  $("packText").textContent = hl
+    ? "One zip file with your Shorts, a captions file, cover picture and ready-to-paste text for each one, plus the title ideas, description and captions file (.srt) for your long video. You still post it yourself."
+    : "One zip file with your video, a captions file, a cover picture, picture descriptions and your ready-to-paste text. You still post it yourself.";
+  $("remake").textContent = hl ? "Remake my Shorts" : "Remake video";
+  const vurl = (p, i) => r.example && r.video_urls ? r.video_urls[i] : `/api/jobs/${id}/${p.file}`;
+  if (!r.example && r.version) version = r.version;   // the server knows which version this is, even after a reload
+  resetFeedback(rep);
+  drawReviewHelpers(id, r);
+  $("sendOnly").textContent = "Just send a note to the team";
+  const c = r.copy;
+
+  // --- the video(s) ---
+  const totalMb = parts.reduce((a, p) => a + (p.size_mb || 0), 0);
+  const noteText = hl ? `I cut ${parts.length} Short${parts.length > 1 ? "s" : ""} from your ${rep.original ? mmss(rep.original) + " " : ""}video, each under 60 seconds.${parts.length > 1 ? " Each Short has its own title and captions below." : ""}`
+    : many ? `Your video was long, so I split it into ${parts.length} parts, each under 60 seconds.${c && (c.parts || []).length > 1 ? " Each part has its own title and captions below." : ""}` : "";
+  $("splitNote").textContent = noteText;
+  $("splitNote").classList.toggle("hidden", !noteText);
+  const seenWhy = new Set();
+  $("players").innerHTML = parts.map((p, i) => {
+    const size = p.size_mb ? ` (${fileMB(p.size_mb)})` : "";
+    const name = hl ? (many ? `Save Short ${i + 1}` : "Save Short") : many ? `Save part ${i + 1}` : "Save video";
+    const head = hl ? `Short ${i + 1}${many ? " of " + parts.length : ""}` : many ? `Part ${i + 1} of ${parts.length}` : "";
+    let from = "";
+    if (hl && Number.isFinite(+p.start_at) && Number.isFinite(+p.end_at)) {
+      const why = p.why && !seenWhy.has(p.why) ? String(p.why) : "";   // the same sentence on every Short says nothing
+      if (why) seenWhy.add(why);
+      from = `<p class="short-from">From ${mmss(p.start_at)} to ${mmss(p.end_at)} of your video${why ? `<span class="why">${esc(why)}</span>` : ""}</p>`;
+    }
+    const poster = r.example ? (r.thumb_url ? ` poster="${r.thumb_url}"` : "") : i === 0 ? ` poster="/api/jobs/${id}/thumb.jpg"` : "";
+    const next = i === 0 ? `<p class="next-line">Next: ${hl ? (many ? "save each Short" : "save the Short") : many ? "save each part" : "save the video"}, then copy a caption below and post it yourself. Nothing is posted for you.${ios ? " On iPhone, tap Save Video in the list that opens." : ""}${totalMb > 100 ? " These are big files, so Wi-Fi is the best way to save them." : ""}</p>` : "";
+    return `
+    <div class="card pcard" id="part${i + 1}" style="padding:14px">
+      ${head ? `<h2 style="margin:4px 4px 12px">${head} <span class="muted" style="font:400 15px var(--sans)">${secs(p.length)}</span></h2>` : ""}
+      <div class="player" style="margin-bottom:12px"><video controls playsinline preload="${i === 0 ? "auto" : "metadata"}" src="${vurl(p, i)}"${poster}></video></div>
+      ${from}
+      ${canSave ? `<button class="big save" data-file="${p.file}" data-part="${many ? i + 1 : 0}" style="margin-top:0">${name}${size}</button>
+        <a class="alt-dl" href="${vurl(p, i)}" download>Download the file instead</a>`
+        : `<a class="big dl" href="${vurl(p, i)}" download style="margin-top:0">${name}${size}</a>`}
+      ${next}
+    </div>`;
+  }).join("");
+  $("players").querySelectorAll("a[download]").forEach(a => a.addEventListener("click", () => logEvent("download")));
+  const slug = ((c && c.titles && c.titles[0]) || "video").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70) || "video";
+  document.querySelectorAll(".save").forEach(b => b.onclick = async () => {
+    const label = b.textContent; b.disabled = true; b.textContent = "Getting it ready…";
+    try {   // the phone's share sheet: Save Video puts it in Photos, where you post from
+      const blob = await (await fetch(`/api/jobs/${id}/${b.dataset.file}`)).blob();
+      const f = new File([blob], `${slug}${+b.dataset.part ? (hl ? "-short" : "-part") + b.dataset.part : ""}.mp4`, { type: "video/mp4" });
+      await navigator.share({ files: [f] });
+      logEvent("download");
+    } catch (e) {
+      if (e.name !== "AbortError") {   // the share sheet isn't available or failed: an ordinary download instead
+        const a = document.createElement("a"); a.href = `/api/jobs/${id}/${b.dataset.file}`; a.download = ""; a.click();
+        logEvent("download");
+      }
+    }
+    b.disabled = false; b.textContent = label;
+  });
+  const lenText = hl && many ? `${parts.length} Shorts` : many ? `${parts.length} parts` : secs(rep.length);
+  $("madeAt").textContent = lenText;
+  if (!r.example) fetch("/api/videos").then(x => x.ok ? x.json() : null).then(v => {
+    const row = v && v.videos.find(x => x.job_id === id);
+    if (row && row.made_at) $("madeAt").textContent = "Made " + new Date(row.made_at).toLocaleString(undefined,
+      { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " · " + lenText;
+  }).catch(() => {});
+
+  // part tabs: one control that scrolls to a part's video and shows its words
+  const ptabs = $("partTabs");
+  ptabs.classList.toggle("hidden", !many);
+  if (many) {
+    const words = i => { if (c && (c.parts || [])[i]) showCopy(c.parts[i], i + 1); };
+    ptabs.setAttribute("aria-label", hl ? "Shorts from your video" : "Parts of your video");
+    tabs(ptabs, parts.map((_, i) => [String(i + 1), `${hl ? "Short" : "Part"} ${i + 1} of ${parts.length}`]), "1", k => {
+      $("part" + k).scrollIntoView({ behavior: "smooth", block: "start" });
+      words(+k - 1);
+    });
+    document.querySelectorAll("#players video").forEach((v, i) => v.addEventListener("play", () => {   // playing a part shows its words too
+      const b = ptabs.querySelector(`.tab[data-k="${i + 1}"]`);
+      if (!b || b.getAttribute("aria-selected") === "true") return;
+      ptabs.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+      words(i);
+    }));
+  }
+
+  // --- what I did, in plain words ---
+  const chips = [`<span class="chip">${rep.settings?.orientation === "horizontal" && !hl ? "Video is horizontal, 1920x1080, for YouTube" : "Video is the right size for TikTok, Reels and Shorts"}</span>`];
+  if (hl) chips.push(`<span class="chip">Cut ${parts.length} Short${parts.length > 1 ? "s" : ""} from your ${rep.original ? mmss(rep.original) + " " : ""}video</span>`);
+  if (hl && c && c.source && !/^auto/.test(c.source)) chips.push(`<span class="chip">Only the words you say went to the AI helper, never pictures</span>`);
+  if (c && c.format_label && !hl) chips.push(`<span class="chip">Looks like a ${esc(c.format_label)} <button class="linkbtn chipbtn no-example" id="fmtChange">Not right?</button></span>`);
+  if (rep.settings && rep.settings.privacy === "private") chips.push(`<span class="chip">Your pictures were not shared</span>`);
+  if (rep.mode === "own_audio") chips.push(`<span class="chip">Used the sound from your clips</span>`);
+  if (rep.music) chips.push(`<span class="chip">Music added</span>`);
+  if (rep.denoised) chips.push(`<span class="chip">Background noise removed</span>`);
+  if (rep.short_by) chips.push(`<span class="chip warn">Your clips run ${Math.round(rep.short_by)}s shorter than your voice-over, so the last shot holds still at the end.</span>`);
+  const skipped = Object.keys(rep.skipped_start || {}).length;
+  if (skipped) chips.push(`<span class="chip">Started ${skipped} clip${skipped > 1 ? "s" : ""} a little later, where the first moments were shaky</span>`);
+  if (rep.cut_from_end > 1) chips.push(`<span class="chip">Cut about ${secs(rep.cut_from_end)} of unused footage</span>`);
+  if (rep.clip_order && (rep.clip_order.moved || []).length) chips.push(`<span class="chip">Put your clips in the order you filmed them</span>`);
+  if ((rep.skipped_clips || []).length) chips.push(`<span class="chip">Didn't need ${rep.skipped_clips.length === 1 ? "this clip" : "these clips"}, your voice-over was already covered: ${esc(rep.skipped_clips.join(", "))}</span>`);
+  // what her typed note did, in her words: the changes made, the ones already true, and the ones the team has to build
+  pendingApplied.forEach(t => chips.push(`<span class="chip">✓ Changed as you asked: ${esc(t)}</span>`));
+  pendingNote.forEach(t => chips.push(isAlready(t) || isGuide(t) ? `<span class="chip">${esc(t)}</span>`
+    : `<span class="chip warn">Not changed yet, sent to the team: ${esc(t)}</span>`));
+  pendingApplied = []; pendingNote = [];
+  (rep.moved || []).forEach(t => chips.push(`<span class="chip">✓ ${esc(t)}</span>`));
+  if ((rep.steadied || []).length) chips.push(`<span class="chip">✓ Used a steadier part of ${rep.steadied.length === 1 ? "a shaky clip" : rep.steadied.length + " shaky clips"}</span>`);
+  (rep.warnings || []).forEach(w => chips.push(`<span class="chip warn">${esc(w.message)}</span>`));
+  if (rep.ai_error && rep.ai_error.message) chips.push(`<span class="chip warn">${esc(rep.ai_error.message)}</span>`);
+  // two plain groups: what was done for her, then anything worth knowing (the amber notes)
+  const done = chips.filter(x => !x.includes('class="chip warn"')), know = chips.filter(x => x.includes('class="chip warn"'));
+  $("notes").innerHTML = `<div class="notehead" id="notesDone">Done for you</div><div class="chips">${done.join("")}</div>`
+    + (know.length ? `<div class="notehead" id="notesKnow">Worth knowing</div><div class="chips">${know.join("")}</div>` : "");
+  const fc = $("fmtChange");
+  if (fc) fc.onclick = () => { openChange(); $("moreOpts").open = true; $("fmtSel").scrollIntoView({ behavior: "smooth", block: "center" }); $("fmtSel").focus(); };
+
+  drawDid(); drawTranscript(r);
+  $("shotCard").classList.add("hidden");
+  if (!r.example) fillReorder(id).then(() => { drawDid(); drawShots(id); });
+  drawPanels(rep, r);
+  drawLong(id, rep, r);
+
+  // --- copy, platform captions, check list ---
+  $("copyCard").classList.toggle("hidden", !c);
+  $("platformCard").classList.add("hidden");
+  drawChecks(id, c);
+  if (!c) { $("checkCard").classList.remove("hidden"); } else {
+    $("copySrc").textContent = c.source ? "Pulled from your own words. Pick one and tweak it as you like." : "Written in your voice. Pick the title you like, then tweak it when you paste.";
+    showCopy(many && (c.parts || []).length > 1 ? c.parts[0] : c, many && (c.parts || []).length > 1 ? 1 : 0);
+    $("aiBox").classList.add("hidden");
+    $("aiLink").classList.toggle("hidden", !r.ai_prompt);
+    if (r.ai_prompt) {
+      $("aiBox").querySelectorAll(".copyhint").forEach(x => x.remove());
+      const hint = el("div", "copyhint"); $("aiBox").appendChild(hint);
+      $("aiLink").onclick = () => $("aiBox").classList.toggle("hidden");
+      $("copyPrompt").onclick = async () => {
+        const ok = await copyText(r.ai_prompt, null);
+        $("copyPrompt").textContent = ok ? "Copied ✓ Now paste it into a chat" : "Copy request";
+        hint.textContent = ok ? "" : "Your phone wouldn't copy it. You can skip this one, it's optional.";
+      };
+    }
+  }
+
+  // --- posting row and post pack ---
+  drawPosting(id, r);
+  $("packLink").href = `/api/jobs/${id}/postpack`;
+  $("packNote").textContent = totalMb ? `About ${fileMB(totalMb + 1)}. It is mostly your video.` : "";
+}
+
+// one set of titles, description and captions: the whole video, or one part of it
+let platformSel = (() => { try { return localStorage.getItem("platform") || ""; } catch (_) { return ""; } })();
+function showCopy(src, part) {
+  const c = R && R.r.copy, n = R ? R.parts.length : 1;
+  const box = $("copy");
+  box.innerHTML = "";
+  const titles = src.titles || [];
+  if (titles[0]) box.appendChild(field("Title idea 1", titles[0], "title"));
+  if (titles.length > 1) {
+    const d = el("details", "more", `<summary>More title ideas</summary>`);
+    titles.slice(1).forEach((t, i) => d.appendChild(field(`Title idea ${i + 2}`, t, "title")));
+    box.appendChild(d);
+  }
+  if (src.hook) box.appendChild(field("Opening line", src.hook));
+  if (src.description) box.appendChild(field("Description", src.description));
+  if (src.cta) box.appendChild(field("Closing line", src.cta));
+  const unit = R && R.hl ? "Short" : "Part";
+  if (part && n > 1) box.insertAdjacentHTML("afterbegin", `<p class="part-for">Showing the words for ${unit} ${part} of ${n}.</p>`);
+  const pc = src.captions || {}, avail = PLATFORMS.filter(([k]) => pc[k]).map(([k, name]) => [k, src.orientation === "horizontal" && k === "youtube_shorts" ? "YouTube" : name]);
+  $("platformCard").classList.toggle("hidden", !avail.length);
+  if (!avail.length) return;
+  const label = part && n > 1 ? `${unit} ${part}` : "";
+  const draw = k => {
+    $("platforms").innerHTML = "";
+    const name = avail.find(a => a[0] === k)[1];
+    $("platforms").appendChild(field(label ? `${name} (${label})` : name, pc[k], "", k));
+    platformSel = k; try { localStorage.setItem("platform", k); } catch (_) {}
+  };
+  const first = avail.some(a => a[0] === platformSel) ? platformSel : avail[0][0];
+  tabs($("platformTabs"), avail, first, draw);
+  draw(first);
+}
+
+// "Before you post": the fixed list as tick boxes (kept in this browser), then anything specific to this video
+const FALLBACK_CHECKS = ["Anything you mention is still true", "Phone number and website are right",
+  "Nobody identifiable, no license plates, no mail or family photos in the video"];
+function drawChecks(id, c) {
+  const list = (c && c.checklist && c.checklist.length ? c.checklist : FALLBACK_CHECKS);
+  const key = "chk:" + id;
+  let ticked = []; try { ticked = JSON.parse(store.get(key) || "[]"); } catch (_) {}
+  $("checkList").innerHTML = "";
+  list.forEach((t, i) => {
+    const l = el("label", "checkrow", `<input type="checkbox"><span></span>`);
+    l.querySelector("span").textContent = t;
+    const cb = l.querySelector("input"); cb.checked = ticked.includes(i);
+    cb.onchange = () => {
+      try { ticked = JSON.parse(store.get(key) || "[]"); } catch (_) { ticked = []; }
+      ticked = cb.checked ? [...new Set([...ticked, i])] : ticked.filter(x => x !== i);
+      store.set(key, JSON.stringify(ticked));
+    };
+    $("checkList").appendChild(l);
+  });
+  const notes = (c && c.review_notes) || [], box = $("reviewNotes");
+  box.innerHTML = "";
+  if (!notes.length) return;
+  const n = el("div", "notes", `<div class="label" style="color:inherit;margin:0 0 4px">Worth a second look</div>`);
+  notes.forEach((t, i) => { const p = el("p"); p.textContent = t; if (i >= 2) p.className = "extra hidden"; n.appendChild(p); });
+  if (notes.length > 2) {
+    const more = el("button", "linkbtn", `Show all ${notes.length}`);
+    more.style.color = "inherit";
+    more.onclick = () => { const open = n.querySelector(".extra").classList.contains("hidden"); n.querySelectorAll(".extra").forEach(p => p.classList.toggle("hidden", !open)); more.textContent = open ? "Show fewer" : `Show all ${notes.length}`; };
+    n.appendChild(more);
+  }
+  box.appendChild(n);
+}
+
+// "Posted it?": her own record, kept on the server. Nothing is posted anywhere.
+async function drawPosting(id, r) {
+  const box = $("postBtns"); box.innerHTML = ""; $("postMsg").textContent = "";
+  if (r.example) return;
+  let state = { posted: [] };
+  try { const x = await fetch(`/api/jobs/${id}/posting`); if (x.ok) state = await x.json(); } catch (_) {}
+  const say = () => {
+    const names = (state.posted || []).map(p => ([...PLATFORMS, PLATFORM_LONG].find(a => a[0] === p.platform) || [0, p.platform || "somewhere"])[1]);
+    $("postMsg").innerHTML = names.length ? `Marked as posted on ${esc(names.join(", "))}. <button class="linkbtn" id="postUndo" style="min-height:44px">Not posted yet</button>` : "";
+    box.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-pressed", String((state.posted || []).some(p => p.platform === b.dataset.k))));
+    const u = $("postUndo");
+    if (u) u.onclick = async () => {
+      try { const x = await fetch(`/api/jobs/${id}/posting`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "draft" }) }); if (x.ok) state = await x.json(); } catch (_) {}
+      say();
+    };
+  };
+  const long = r.report && r.report.mode === "highlights" && r.report.longform;
+  (long ? [PLATFORM_LONG, ...PLATFORMS] : PLATFORMS).forEach(([k, name]) => {
+    const b = el("button", "tab"); b.textContent = name; b.dataset.k = k;
+    b.onclick = async () => {
+      try {
+        const x = await fetch(`/api/jobs/${id}/posting`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "posted", platform: k }) });
+        if (x.ok) { state = await x.json(); logEvent("posted", k); } else $("postMsg").textContent = "I couldn't save that just now. Please try again.";
+      } catch (_) { $("postMsg").textContent = "I couldn't save that just now. Please try again."; return; }
+      say();
+    };
+    box.appendChild(b);
+  });
+  say();
+}
+
+// What we did: each clip, where it sits in the video and for how long
+function drawDid() {
+  if (!R) return;
+  const { r } = R, tl = r.report.timeline || [], box = $("didList");
+  $("didBox").classList.toggle("hidden", !tl.length);
+  if (!tl.length) return;
+  box.innerHTML = `<p class="muted" style="margin:0 0 8px">${r.report.mode === "own_audio" ? "Your clips, joined in the order you gave them." : "Where each clip ended up in your video."}</p>`;
+  const ol = el("ol", "did");
+  tl.forEach(t => {
+    const li = el("li"), len = Math.max(0, t.end - t.start);
+    li.innerHTML = `<b></b><span>${mmss(t.start)} to ${mmss(t.end)} (${len < 10 ? len.toFixed(1) : Math.round(len)} s)${t.skipped_start > 0.2 ? `, starting ${t.skipped_start.toFixed(1)} s in` : ""}</span>`;
+    li.querySelector("b").textContent = herName(t.clip);
+    ol.appendChild(li);
+  });
+  box.appendChild(ol);
+}
+
+// The words burned into the picture. Tapping a word starts a fix for it (not on the example).
+function drawTranscript(r) {
+  const t = r.transcript || {}, box = $("transcript");
+  const texts = (t.parts || []).filter(x => x && x.trim());
+  $("transBox").classList.toggle("hidden", !t.burned_in || !texts.length);
+  box.innerHTML = "";
+  if (!texts.length) return;
+  const maybe = new Set(((r.report.uncertain_words || [])).map(u => String(u.word).toLowerCase().replace(/[^\p{L}\p{N}'’-]/gu, "")));
+  box.innerHTML = `<p class="muted" style="margin:0 0 8px">${r.example ? "The words shown on the video." : "The words shown on the video. Tap a word to fix it."}</p>`;
+  (t.parts || []).forEach((txt, i) => {
+    if (!txt) return;
+    const p = el("p", "trans");
+    if ((t.parts || []).length > 1) p.insertAdjacentHTML("beforeend", `<b class="tpart">${r.report.mode === "highlights" ? "Short" : "Part"} ${i + 1} of ${t.parts.length}</b>`);
+    txt.split(/(\s+)/).forEach(tok => {
+      const w = (tok.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/u) || [""])[0];
+      if (!tok.trim() || !w || r.example) { p.appendChild(document.createTextNode(tok)); return; }
+      const b = el("button", "w" + (maybe.has(w.toLowerCase()) ? " maybe" : "")); b.textContent = tok;
+      b.onclick = () => startFix(w);
+      p.appendChild(b);
+    });
+    box.appendChild(p);
+  });
+}
+
+// ---- the YouTube post for the whole long video (Shorts from a long video) ----
+function descriptionField(text) {
+  const wrap = el("div", "field", `<div class="top"><div class="label">Description</div><button class="copybtn">Copy</button></div><div class="text desc"></div><div class="copyhint" role="status" aria-live="polite"></div>`);
+  const body = wrap.querySelector(".desc"), CH = /^(\d{1,2}(?::\d{2}){1,2})\s+(\S.*)$/;
+  String(text || "").split(/\n\s*\n/).forEach(block => {
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return;
+    if (lines.every(l => CH.test(l))) {   // the chapter lines, as a readable list
+      const ol = el("ol", "chapters");
+      lines.forEach(l => { const m = CH.exec(l), li = el("li", null, "<b></b><span></span>"); li.querySelector("b").textContent = m[1]; li.querySelector("span").textContent = m[2]; ol.appendChild(li); });
+      body.appendChild(ol);
+    } else { const p = el("p"); p.textContent = lines.join("\n"); body.appendChild(p); }
+  });
+  copyButton(wrap.querySelector("button"), String(text || ""), body, wrap.querySelector(".copyhint"));
+  return wrap;
+}
+async function drawLong(id, rep, r) {
+  const card = $("ytCard"), box = $("ytBody");
+  card.classList.add("hidden"); box.innerHTML = ""; $("ytJump").classList.add("hidden");
+  if (!rep.longform || r.example) return;
+  let kit = null;
+  try { const x = await fetch(`/api/jobs/${id}/longform`); if (x.ok) kit = await x.json(); } catch (_) {}
+  if (!kit || !R || R.id !== id) return;
+  const titles = (kit.titles || []).filter(Boolean);
+  if (titles[0]) box.appendChild(field("Title idea 1", titles[0], "title"));
+  if (titles.length > 1) {
+    const d = el("details", "more", "<summary>More title ideas</summary>");
+    titles.slice(1).forEach((t, i) => d.appendChild(field(`Title idea ${i + 2}`, t, "title")));
+    box.appendChild(d);
+  }
+  if (kit.description) box.appendChild(descriptionField(kit.description));
+  const tags = (kit.tags || []).filter(Boolean);
+  if (tags.length) box.appendChild(field("Tags", tags.join(", ")));
+  $("ytSrc").textContent = kit.source === "ai" ? "Written in your voice from what you say in the video. Change anything you like, then paste it into YouTube."
+    : "Pulled from your own words. Change anything you like, then paste it into YouTube.";
+  const wide = rep.mode !== "highlights";   // a horizontal YouTube video made here, not Shorts from a long video
+  $("ytHead").textContent = wide ? "For your video on YouTube" : "For your long video on YouTube";
+  $("ytSrtBox").classList.toggle("hidden", wide); $("ytStepsWide").classList.toggle("hidden", !wide); $("ytStepsLong").classList.toggle("hidden", wide);
+  $("ytJumpText").textContent = wide ? "Also ready: a title and a description with chapters for YouTube." : "Also ready: a title, a description with chapters and a captions file for your long video.";
+  $("srtLink").href = `/api/jobs/${id}/long.srt`;
+  $("srtLink").onclick = () => logEvent("download");
+  card.classList.remove("hidden");
+  $("ytJump").classList.remove("hidden");
+  $("ytJumpBtn").onclick = () => card.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ---- panels that only appear when there is something to look at ----
+function heads(title, explain, cls = "") {
+  const card = el("div", "card heads " + cls);
+  card.innerHTML = `<h2></h2><p class="muted" style="margin:4px 0 10px"></p><div class="body"></div>`;
+  card.querySelector("h2").textContent = title; card.querySelector("p").textContent = explain;
+  $("panels").appendChild(card);
+  return card.querySelector(".body");
+}
+function panelButton(text, cls, fn) {
+  const b = el("button", cls); b.textContent = text;
+  b.onclick = async () => { b.disabled = true; try { await fn(); } finally { b.disabled = false; } };
+  return b;
+}
+function seekRow(at, text, part) {
+  const row = el("button", "seek", `<b>${mmss(at)}</b><span></span>`);
+  row.querySelector("span").textContent = text;
+  row.onclick = () => seekTo(at, part || 1);
+  return row;
+}
+function drawPanels(rep, r) {
+  $("panels").innerHTML = "";
+  if (r.example) return;
+  const errBox = () => { const e = el("p", "err-box"); e.setAttribute("role", "alert"); return e; };
+  const remakeWith = (changes, remember, err) => { err.textContent = ""; return askRemake({ changes, remember: !!remember, comment: "", remake: true }, err); };
+  // 1. said, never shown
+  if ((rep.not_shown || []).length) {
+    const b = heads("You mention things I couldn't show", "You talk about these, but none of your clips seem to show them. Tap one to see where in the video you say it. You could film a few seconds of each, add it, and make the video again.");
+    rep.not_shown.forEach(n => b.appendChild(seekRow(n.at, `You say "${n.said}"` + (n.idea ? `. Idea: ${n.idea}` : ""))));
+    const go = el("button", "big secondary", "Add a clip and make it again");
+    go.style.marginTop = "12px";
+    go.onclick = () => {
+      notes = [clips.length ? "Add your new clip, then tap Make my video. Your other clips are still here." : "Add all your clips again, plus the new one, then tap Make my video."];
+      show("pick"); render();
+    };
+    b.appendChild(go);
+  }
+  // 1b. she talks about something for longer than her footage of it lasts
+  if ((rep.short_footage || []).length) {
+    const b = heads("Your footage is shorter than your words", "You talk about these for longer than the clips of them last, so something else is on screen for part of it. Tap one to see where. A few more seconds of each would cover it.");
+    rep.short_footage.forEach(n => {
+      const more = Math.max(1, +n.add || 1);
+      b.appendChild(seekRow(n.at, `You talk about this for ${secs(n.need)}, but ${n.clip || "your clip"} is ${secs(n.have)}. About ${more} more second${more === 1 ? "" : "s"} of it would cover your words: "${n.said}"`));
+    });
+    const go = el("button", "big secondary", "Add more footage and make it again");
+    go.style.marginTop = "12px";
+    go.onclick = () => {
+      notes = [clips.length ? "Add your extra footage, then tap Make my video. Your other clips are still here." : "Add all your clips again, plus the extra footage, then tap Make my video."];
+      show("pick"); render();
+    };
+    b.appendChild(go);
+  }
+  // 1c. she filmed far more than she talked about
+  if (rep.mode === "voice" && rep.clips_total && rep.voice && rep.voice < 50 && rep.cut_from_end >= 15 && rep.cut_from_end >= 0.4 * rep.clips_total) {
+    const b = heads("You filmed more than you talked about", `You filmed about ${mmss(rep.clips_total)} but your voice-over is ${mmss(rep.voice)}, so about ${secs(rep.cut_from_end)} of your footage wasn't used. If you want more of it in the video, record a longer voice memo (say a little about each room you filmed), add it, and make the video again. Keep it under a minute so it still fits a Short.`);
+    const go = el("button", "big secondary", "Add a longer voice memo");
+    go.onclick = () => {
+      notes = [clips.length ? "Add your longer voice memo, then tap Make my video. It replaces the old one, and your clips are still here." : "Add all your clips again, plus the longer voice memo, then tap Make my video."];
+      show("pick"); render();
+    };
+    b.appendChild(go);
+  }
+  // 2. repeated lines that were cut
+  if ((rep.retakes || []).length) {
+    const b = heads("Repeated lines I cut", "You said these lines twice in a row. I kept the last time and cut the first. If I got it wrong, you can keep both.");
+    rep.retakes.forEach(t => b.appendChild(seekRow(t.at, `"${t.said}"`, t.part)));
+    const err = errBox();
+    const keep = panelButton("Keep both takes", "big secondary", () => remakeWith({ cut_retakes: false }, false, err));
+    keep.style.marginTop = "12px"; b.appendChild(keep); b.appendChild(err);
+  } else if (rep.settings && rep.settings.cut_retakes === false && rep.mode === "own_audio") {
+    const b = heads("Repeated lines", "Both takes of a repeated line are kept, the way you asked.");
+    const err = errBox();
+    b.appendChild(panelButton("Cut the repeats again", "big secondary", () => remakeWith({ cut_retakes: true }, false, err))); b.appendChild(err);
+  }
+  // 3. start at the hook
+  const op = rep.opening;
+  if (op && !store.get("hook-ok:" + R.id)) {
+    const said = op.said ? `"${op.said}"` : "a greeting";
+    const err = errBox();
+    if (op.applied) {
+      const b = heads("Starting at your first real line", `I started your video at ${mmss(op.hook_at)}, skipping the first ${Math.round(op.greeting_seconds)} seconds (${said}). If you want the greeting, you can keep it.`);
+      b.appendChild(panelButton("Keep the greeting", "big secondary", () => remakeWith({ start_at_hook: false }, false, err))); b.appendChild(err);
+    } else {
+      const b = heads("Start at the hook?", `Your video opens with ${Math.round(op.greeting_seconds)} seconds of ${said}. Your first real line starts at ${mmss(op.hook_at)}. The first few seconds are what make people keep watching.`);
+      const row = el("div", "opts");
+      const start = panelButton("Start there", "tab primary", () => remakeWith({ start_at_hook: true }, false, err));
+      const keep = el("button", "tab", "Keep it"); keep.onclick = () => { store.set("hook-ok:" + R.id, "1"); b.parentElement.remove(); };
+      const see = el("button", "tab", "Watch the start"); see.onclick = () => seekTo(0);
+      row.append(start, keep, see); b.appendChild(row); b.appendChild(err);
+    }
+  }
+  // 4. words I wasn't sure of
+  const seen = new Set(), words = (rep.uncertain_words || []).filter(u => { const k = String(u.word).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
+  if (words.length) {
+    const b = heads("Check these words", "I wasn't sure I heard these right. Fix any that are wrong, then tap Fix these words and I'll remake the video. I'll remember the fixes for next time.");
+    const inputs = [], err = errBox();
+    const go = el("button", "big", "Fix these words"); go.disabled = true; go.style.marginTop = "12px";
+    words.forEach(u => {
+      const row = el("div", "wordrow", `<button class="seek"><b></b></button><input aria-label="What it should say" autocomplete="off" autocapitalize="off" spellcheck="false">`);
+      row.querySelector("b").textContent = mmss(u.at);
+      row.querySelector(".seek").onclick = () => seekTo(u.at, u.part || 1);
+      const inp = row.querySelector("input"); inp.value = u.word; inp.dataset.was = u.word;
+      inp.oninput = () => { go.disabled = !inputs.some(i => i.value.trim() && i.value.trim() !== i.dataset.was); };
+      inputs.push(inp); b.appendChild(row);
+    });
+    go.onclick = async () => {
+      const fix = {};
+      inputs.forEach(i => { if (i.value.trim() && i.value.trim() !== i.dataset.was) fix[i.dataset.was] = i.value.trim(); });
+      go.disabled = true; if (!await remakeWith({ caption_fixes: fix }, true, err)) go.disabled = false;
+    };
+    b.appendChild(go); b.appendChild(err);
+  }
+}
+
+// ---------- feedback ----------
+let cur = {}, pick = {}, jobId = null, version = 1;
+const STEP = { size: 10, pos: 0.06, pause: 0.25, music: 4 };
+const MARGIN = [0.33, 0.6];   // the safe zone the captions stay inside
+const NAMES = {
+  size: v => v > 0 ? "bigger captions" : "smaller captions",
+  pos: v => v > 0 ? "captions moved up" : "captions moved down",
+  capoff: () => cur.captions_on === false ? "captions on" : "captions off",
+  pause: v => v < 0 ? "cut more pauses" : "keep more pauses",
+  fillers: () => cur.remove_fillers === false ? "cut ums" : "keep ums",
+  order: () => cur.auto_order === false ? "fix clip order for me" : "keep my clip order",
+  twice: () => cur.match_twice ? "check clip matching once" : "double-check clip matching",
+  steady: () => cur.stabilize === false ? "pick the steadiest part of shaky clips" : "start each clip at the beginning",
+  clips: () => cur.match_clips === false ? "match clips to my words" : "give each clip equal time",
+  starts: () => cur.skip_dead_start === false ? "skip shaky starts" : "keep clip starts",
+  noise: () => cur.denoise ? "keep original sound" : "remove background noise",
+  frame: v => ({ auto: "center on me", fill: "centered crop", fit: "show whole frame" })[v],
+  duck: () => cur.music_duck ? "keep music steady" : "dip music while I speak",
+  music: v => v === "off" ? "no music" : v > 0 ? "louder music" : "quieter music",
+  format: v => `treat it as: ${(v === "auto" ? "let the Video Maker decide" : FORMAT_NAMES[v] || v).toLowerCase()}`,
+  hints: () => "names and places",
+  highlights: v => `${v} Short${+v === 1 ? "" : "s"}`,
+  track: v => v === "" ? "music picked for me" : `music: ${trackTitle(v)}`,
+};
+document.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+  const k = b.dataset.k, v = b.dataset.v;
+  if (!k) return;
+  pick[k] = pick[k] === v ? undefined : v;   // tap again to undo
+  if (k === "music" && pick.music === "off" && pick.track !== undefined) { pick.track = undefined; drawFbMusic(); }   // no music wins over a track
+  document.querySelectorAll(`.opt[data-k="${k}"]`).forEach(x => x.classList.toggle("on", pick[k] === x.dataset.v));
+  updateSummary();
+});
+$("fmtSel").onchange = () => { pick.format = $("fmtSel").value === (cur.format || "auto") ? undefined : $("fmtSel").value; updateSummary(); };
+$("shortsBox").oninput = () => {
+  const n = shortsValue($("shortsBox").value), bad = n === null;
+  pick.highlights = bad || n === (cur.highlights || 3) ? undefined : String(n);
+  $("fbErr").textContent = bad ? "How many Shorts has to be a whole number from 1 to 5." : "";
+  updateSummary();
+};
+$("hintsBox").oninput = () => { const v = $("hintsBox").value.trim(); pick.hints = v === (cur.hints || "") ? undefined : v; updateSummary(); };
+function addFixRow(wrong, right) {
+  const row = document.createElement("div");
+  row.className = "fix";
+  row.innerHTML = `<input aria-label="Wrong word" placeholder="Wrong, e.g. Alexe"><span>&rarr;</span><input aria-label="Right word" placeholder="Right, e.g. Alex"><button class="icon-btn" aria-label="Remove">${ICON.x}</button>`;
+  const [a, b] = row.querySelectorAll("input");
+  if (wrong) a.value = wrong;
+  if (right) b.value = right;
+  row.querySelectorAll("input").forEach(i => i.oninput = updateSummary);
+  row.querySelector("button").onclick = () => { row.remove(); updateSummary(); };
+  $("fixes").appendChild(row);
+  return row;
+}
+$("addFix").onclick = () => addFixRow();
+function fixes() {
+  const out = {};
+  document.querySelectorAll("#fixes .fix").forEach(r => {
+    const [a, b] = r.querySelectorAll("input");
+    if (a.value.trim() && b.value.trim() && a.value.trim() !== b.value.trim()) out[a.value.trim()] = b.value.trim();
+  });
+  return out;
+}
+function openChange() { $("fbCard").classList.remove("hidden"); $("fbOpen").classList.add("hidden"); }
+// A word tapped in the captions text: open the change box with a fix started for it
+function startFix(word) {
+  openChange();
+  let row = [...document.querySelectorAll("#fixes .fix")].find(r => [...r.querySelectorAll("input")].every(i => !i.value.trim()));
+  if (!row) row = addFixRow();
+  const [a, b] = row.querySelectorAll("input");
+  a.value = word; b.value = word;
+  updateSummary();
+  b.scrollIntoView({ behavior: "smooth", block: "center" }); b.focus(); b.select();
+}
+function changes() {
+  const c = {};
+  if (pick.size) c.caption_size = cur.caption_size + STEP.size * pick.size;
+  if (pick.pos) c.caption_margin = +Math.min(MARGIN[1], Math.max(MARGIN[0], cur.caption_margin + STEP.pos * pick.pos)).toFixed(3);
+  if (pick.capoff) c.captions_on = cur.captions_on === false;
+  if (pick.pause) c.pause_gap = +(cur.pause_gap + STEP.pause * pick.pause).toFixed(2);
+  if (pick.frame) { c.framing = pick.frame; if (cur.orientation === "horizontal") c.tall_clips = pick.frame === "fit" ? "bars" : "fill"; }
+  if (pick.fillers) c.remove_fillers = cur.remove_fillers === false;
+  if (pick.clips) c.match_clips = cur.match_clips === false;
+  if (pick.order) c.auto_order = cur.auto_order === false;
+  if (pick.twice) c.match_twice = !cur.match_twice;
+  if (pick.steady) c.stabilize = cur.stabilize === false;
+  if (pick.starts) c.skip_dead_start = cur.skip_dead_start === false;
+  if (pick.noise) c.denoise = !cur.denoise;
+  if (pick.duck) c.music_duck = !cur.music_duck;
+  if (pick.music === "off") c.music_on = false;
+  else if (pick.music) c.music_db = cur.music_db + STEP.music * pick.music;
+  if (pick.format) c.format = pick.format;
+  if (pick.hints !== undefined) c.hints = pick.hints;
+  if (pick.highlights) c.highlights = +pick.highlights;
+  if (pick.track !== undefined) { c.music_track = pick.track; if (!fbReport || !fbReport.music) c.music_on = true; }
+  const f = fixes();
+  if (Object.keys(f).length) c.caption_fixes = f;
+  return c;
+}
+function updateSummary() {
+  if (!$("plan").classList.contains("hidden")) closePlan();   // she changed something: the preview is out of date
+  const list = Object.entries(pick).filter(([, v]) => v !== undefined).map(([k, v]) => NAMES[k](isNaN(+v) || v === "" ? v : +v));
+  const f = Object.entries(fixes()).map(([a, b]) => `"${a}" → "${b}"`);
+  const all = [...list, ...f];
+  $("summary").textContent = all.length ? "Will change: " + all.join(", ") : "";
+  $("remake").disabled = !all.length && !$("comment").value.trim();
+}
+const canSave = !!(navigator.canShare && (() => { try { return navigator.canShare({ files: [new File(["x"], "x.mp4", { type: "video/mp4" })] }); } catch (_) { return false; } })());
+let order = [], clipNames = [], thumbs = {};
+async function fillReorder(id) {
+  let list = [];
+  try { list = (await (await fetch(`/api/jobs/${id}/clips`)).json()).clips || []; } catch (_) {}
+  clipNames = list; order = list.map(c => c.n); thumbs = {};
+  $("orderGroup").classList.toggle("hidden", list.length < 2 || !!(R && R.hl));
+  drawReorder();
+}
+// A small picture for each clip, taken from the finished video at the moment that clip starts. Only done when she opens More options.
+let thumbsFor = null;
+async function loadThumbs() {
+  if (!R || R.r.example || thumbsFor === R.id || order.length < 2) return;
+  thumbsFor = R.id;
+  const tl = R.r.report.timeline || [], first = R.parts[0];
+  const todo = tl.map(t => ({ n: clipNumber(t.clip), at: t.start + Math.min(0.6, Math.max(0, (t.end - t.start) / 2)) }))
+    .filter(x => x.n && x.at < (first.length || 0) - 0.1);
+  if (!todo.length) return;
+  const v = document.createElement("video");
+  v.muted = true; v.playsInline = true; v.preload = "auto"; v.src = `/api/jobs/${R.id}/${first.file}`;
+  const wait = (ev, ms) => new Promise((ok, no) => { const t = setTimeout(() => no(new Error("slow")), ms); v.addEventListener(ev, () => { clearTimeout(t); ok(); }, { once: true }); });
+  try { await wait("loadedmetadata", 15000); } catch (_) { return; }
+  const cv = document.createElement("canvas"); cv.width = 60; cv.height = 106;
+  for (const x of todo) {
+    try {
+      v.currentTime = Math.min(x.at, (v.duration || x.at) - 0.05); await wait("seeked", 8000);
+      cv.getContext("2d").drawImage(v, 0, 0, cv.width, cv.height);
+      thumbs[x.n] = cv.toDataURL("image/jpeg", 0.7); drawReorder(); paintThumbs();
+    } catch (_) {}
+  }
+  v.removeAttribute("src"); v.load();
+}
+$("moreOpts").addEventListener("toggle", () => { if ($("moreOpts").open) loadThumbs(); });
+
+// ---------- "Your words and your clips": one row per phrase, tap to watch it, "Change this shot" to pick another clip ----------
+// Thumbnails come from loadThumbs (the finished video at the moment each clip starts), the same pictures as Clip order.
+function thumbBox(n) { return thumbs[n] ? `<img class="cthumb" alt="" data-thumb="${n}" src="${thumbs[n]}">` : `<span class="cthumb" aria-hidden="true" data-thumb="${n}">${ICON.vid}</span>`; }
+function paintThumbs() {
+  document.querySelectorAll("#shotList [data-thumb]").forEach(x => {
+    const n = +x.dataset.thumb;
+    if (!thumbs[n] || x.tagName === "IMG") return;
+    const img = document.createElement("img"); img.className = "cthumb"; img.alt = ""; img.dataset.thumb = n; img.src = thumbs[n];
+    x.replaceWith(img);
+  });
+}
+const MATCH_WORDS = { "possible match": ["Possible match", "unsure"], "not sure": ["Not sure", "unsure"], "no footage for this": ["No footage for this", "none"] };
+let shotRows = [], shotsFor = null;
+async function drawShots(id) {
+  const card = $("shotCard"), ol = $("shotList");
+  shotRows = []; ol.innerHTML = ""; card.classList.add("hidden");
+  if (!R || R.r.example || R.many || R.hl || R.r.report.mode !== "voice" || clipNames.length < 2) return;
+  let rows = [];
+  try { rows = (await (await fetch(`/api/jobs/${id}/shots`)).json()).rows || []; } catch (_) {}
+  if (!R || R.id !== id || !rows.length) return;
+  shotRows = rows; shotsFor = id;
+  rows.forEach((row, i) => {
+    const li = document.createElement("li");
+    const nm = clipNames.find(c => c.n === row.clip);
+    const mw = MATCH_WORDS[row.match];
+    const clipText = row.clip ? `Clip ${row.clip}${nm ? " (" + nm.name + ")" : ""}` : "";
+    li.innerHTML = `<button class="shot" type="button">${row.clip ? thumbBox(row.clip) : ""}<b>${mmss(row.start)}</b><span class="words"><span class="said"></span><span class="mw${mw ? " " + mw[1] : ""}"></span></span></button>
+      <button class="tab change" type="button" aria-expanded="false">Change this shot</button><div class="pick hidden"></div>`;
+    li.querySelector(".said").textContent = `"${row.text}"`;
+    li.querySelector(".mw").textContent = [clipText, mw ? mw[0] : "", row.pinned ? "your choice" : ""].filter(Boolean).join(" · ");
+    li.querySelector(".shot").setAttribute("aria-label", `Watch ${mmss(row.start)}: ${row.text}`);
+    li.querySelector(".shot").onclick = () => seekTo(row.start);
+    li.querySelector(".change").onclick = () => openPicker(li, row);
+    ol.appendChild(li);
+  });
+  card.classList.remove("hidden");
+  loadThumbs();
+}
+function openPicker(li, row) {
+  const box = li.querySelector(".pick"), btn = li.querySelector(".change");
+  const open = box.classList.contains("hidden");
+  document.querySelectorAll("#shotList .pick").forEach(p => { p.classList.add("hidden"); p.innerHTML = ""; });
+  document.querySelectorAll("#shotList .change").forEach(b => b.setAttribute("aria-expanded", "false"));
+  if (!open) { btn.focus(); return; }
+  btn.setAttribute("aria-expanded", "true");
+  const others = clipNames.filter(c => c.n !== row.clip);
+  box.innerHTML = `<p class="muted" style="margin:8px 0 0">Which clip should be on screen while you say this?</p><ul class="picker"></ul>
+    <div class="opts"><button class="tab primary go" type="button" disabled>Make it with this clip</button><button class="tab cancel" type="button">Cancel</button></div><p class="err-box" role="alert"></p>`;
+  let chosen = null;
+  const ul = box.querySelector(".picker"), go = box.querySelector(".go");
+  others.forEach(c => {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.dataset.n = c.n;
+    b.innerHTML = `${thumbBox(c.n)}<span></span>`;
+    b.querySelector("span").textContent = `Clip ${c.n} (${c.name})`;
+    b.onclick = () => { chosen = c.n; ul.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); go.disabled = false; };
+    const item = document.createElement("li"); item.appendChild(b); ul.appendChild(item);
+  });
+  box.querySelector(".cancel").onclick = () => openPicker(li, row);
+  go.onclick = async () => {
+    if (!chosen) return;
+    go.disabled = true;
+    const ok = await askRemake({ changes: { pins: [{ start: row.start, end: row.end, clip: chosen }] }, remember: false, comment: "", remake: true },
+                               box.querySelector(".err-box"));
+    if (!ok) go.disabled = false;
+  };
+  box.classList.remove("hidden");
+  paintThumbs();
+  const first = ul.querySelector("button"); if (first) first.focus();
+}
+function drawReorder() {
+  const ol = $("reorderList"); ol.innerHTML = "";
+  order.forEach((n, i) => {
+    const li = document.createElement("li");
+    const nm = clipNames.find(c => c.n === n);
+    li.innerHTML = `<b>${i + 1}</b>${thumbs[n] ? `<img class="cthumb" alt="" src="${thumbs[n]}">` : `<span class="cthumb" aria-hidden="true">${ICON.vid}</span>`}<span class="rname">${esc(nm ? nm.name : "Clip " + n)}</span>
+      <button class="icon-btn" aria-label="Move up" ${i ? "" : "disabled"}>${ICON.up}</button>
+      <button class="icon-btn" aria-label="Move down" ${i < order.length - 1 ? "" : "disabled"}>${ICON.down}</button>`;
+    const [up, down] = li.querySelectorAll("button");
+    up.onclick = () => { [order[i - 1], order[i]] = [order[i], order[i - 1]]; drawReorder(); };
+    down.onclick = () => { [order[i + 1], order[i]] = [order[i], order[i + 1]]; drawReorder(); };
+    ol.appendChild(li);
+  });
+  $("reorderGo").disabled = order.every((n, i) => n === i + 1);
+}
+$("reorderGo").onclick = async () => {
+  $("reorderGo").disabled = true;
+  const res = await fetch(`/api/jobs/${jobId}/reorder`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order }) });
+  const r = await res.json().catch(() => ({}));
+  if (!res.ok) { $("reorderGo").disabled = false; $("fbErr").textContent = r.detail || "I couldn't change the order. Please try again."; return; }
+  version += 1;
+  show("working"); setStep(1, "Making it in the new order");
+  try { localStorage.setItem("lastJob", r.job_id); } catch (_) {}
+  poll(r.job_id);
+};
+$("fbOpen").onclick = () => { openChange(); $("fbCard").scrollIntoView({ behavior: "smooth" }); };
+const syncSend = () => { $("sendOnly").disabled = !($("comment").value.trim() || $("byHand").value); };
+$("byHand").oninput = syncSend;
+function resetFeedback(report) {
+  $("fbCard").classList.add("hidden"); $("fbOpen").classList.remove("hidden");   // the posting kit comes first; changes are one tap away
+  $("moreOpts").open = false; thumbsFor = null;
+  $("byHand").value = ""; $("fbErr").textContent = ""; $("normalAsk").classList.add("hidden"); $("normalMsg").classList.add("hidden");
+  cur = Object.assign({ highlights: 3, captions_on: true, caption_size: 78, caption_margin: 0.36, pause_gap: 0.7, remove_fillers: true, skip_dead_start: true, match_clips: true, auto_order: true, match_twice: false, stabilize: true, denoise: false, music_duck: false, music_db: -22, framing: "auto", hints: "", format: "auto" }, report.settings);
+  // asked for but it didn't happen (program missing or failed): the video has its original sound
+  if (report.denoised === false) cur.denoise = false;
+  pick = {};
+  document.querySelectorAll("#fbCard .opt").forEach(x => x.classList.remove("on"));
+  $("fillerToggle").textContent = cur.remove_fillers === false ? 'Cut the "um"s and "uh"s' : 'Keep the "um"s and "uh"s';
+  $("matchToggle").textContent = cur.match_clips === false ? "Match clips to what I say" : "Give each clip equal time";
+  const hl = report.mode === "highlights";   // Shorts from a long video: no clip matching, clip starts or clip order
+  $("shortsGroup").classList.toggle("hidden", !hl);
+  $("shortsBox").value = hl ? (report.settings && report.settings.highlights) || 3 : "";
+  $("matchGroup").classList.toggle("hidden", report.mode === "own_audio" || hl);
+  $("matchToggle").classList.toggle("hidden", !report.clip_match);
+  $("orderToggle").classList.toggle("hidden", !report.clip_match);
+  $("orderToggle").textContent = cur.auto_order === false ? "Fix my clip order for me" : "Keep my clip order";
+  $("twiceToggle").classList.toggle("hidden", !report.clip_match || cur.match_clips === false);
+  $("twiceToggle").textContent = cur.match_twice ? "Check the clip matching once" : "Double-check the clip matching";
+  $("steadyToggle").textContent = cur.stabilize === false ? "Pick the steadiest part of shaky clips" : "Always start each clip at the beginning";
+  $("startToggle").textContent = cur.skip_dead_start === false ? "Skip shaky starts" : "Keep the start of each clip";
+  // voice-over mode only, and only when a start was skipped (or she already turned skipping off)
+  const skippedAny = Object.keys(report.skipped_start || {}).length > 0;
+  $("startGroup").classList.toggle("hidden", report.mode === "own_audio" || hl || (!skippedAny && cur.skip_dead_start !== false));
+  $("noiseToggle").textContent = cur.denoise ? "Keep the original sound" : "Remove background noise";
+  $("capToggle").textContent = cur.captions_on === false ? "Turn captions on" : "Turn captions off";
+  $("frameGroup").classList.toggle("hidden", report.mode !== "own_audio" && !hl && cur.orientation !== "horizontal");
+  const wide = cur.orientation === "horizontal" && !hl;
+  document.querySelector('[data-k="frame"][data-v="auto"]').textContent = wide ? (report.mode === "own_audio" ? "Fill upright clips, keep my face (cuts top and bottom)" : "Fill upright clips (cuts top and bottom)") : "Fill the screen, centered on me";
+  document.querySelector('[data-k="frame"][data-v="fill"]').textContent = wide ? "Fill upright clips, centered crop (cuts top and bottom)" : "Fill the screen, centered crop";
+  document.querySelector('[data-k="frame"][data-v="fit"]').textContent = wide ? "Show every clip whole, with plain bars" : "Show the whole frame";
+  $("duckToggle").textContent = cur.music_duck ? "Keep music steady" : "Dip music while I speak";
+  fbReport = report; musicReady.then(drawFbMusic);
+  document.querySelector('.opt[data-k="pos"][data-v="-1"]').disabled = cur.caption_margin <= MARGIN[0] + 0.001;
+  document.querySelector('.opt[data-k="pos"][data-v="1"]').disabled = cur.caption_margin >= MARGIN[1] - 0.001;
+  $("fmtSel").value = FORMAT_NAMES[cur.format] ? cur.format : "auto";
+  $("hintsBox").value = cur.hints || "";
+  $("fixes").innerHTML = ""; addFixRow();
+  $("comment").value = ""; syncSend();
+  $("versionTag").innerHTML = version > 1 ? `<span class="version">Version ${version}</span> <a class="small-link" href="/videos">See earlier versions</a>` : "";
+  updateSummary();
+}
+$("comment").oninput = () => { updateSummary(); syncSend(); };
+let pendingNote = [], pendingApplied = [];
+const isAlready = t => /^Already (that way|as far as it goes):/.test(t);   // notes from the typed-note reader that need no team action
+const isGuide = t => /^To choose which clip plays where/.test(t);           // "show a different clip in the last part": use Clip order
+// Point her at the control that does it: open More options at Clip order. One clip (or Shorts from a long video): say why not.
+function showGuide(text) {
+  const g = $("fbGuide"), og = $("orderGroup");
+  if (og.classList.contains("hidden")) {
+    g.textContent = R && R.hl ? "Shorts from a long video use the picture of your long video, so there is no other clip to choose."
+      : "This video has only one clip, so there is no other clip to show there. Add more clips to your next video to choose between them.";
+  } else {
+    g.textContent = text;
+    $("moreOpts").open = true;
+    og.classList.remove("flash"); void og.offsetWidth; og.classList.add("flash");
+    og.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  }
+  g.classList.remove("hidden");
+}
+
+// Ask for a remake. On a problem the reason shows in plain words right where she is (errEl) and nothing is lost.
+async function askRemake(body, errEl) {
+  let res, r;
+  try {
+    res = await fetch(`/api/jobs/${jobId}/feedback`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    r = await res.json().catch(() => ({}));
+  } catch (_) {
+    if (errEl) errEl.textContent = "The Video Maker computer isn't answering right now. Nothing was lost. Try again in a minute. " + helpSentence();
+    return false;
+  }
+  if (!res.ok) { if (errEl) errEl.textContent = r.detail || "I couldn't send that. Please try again."; return false; }
+  if (!body.remake) return r;
+  if (!r.job_id) {  // her note didn't map to anything the video can change
+    const notes = r.unsupported || [], guide = notes.find(isGuide);
+    const asked = notes.filter(t => !isAlready(t) && !isGuide(t)), same = notes.filter(isAlready);
+    if (guide) showGuide(guide);
+    if (errEl) errEl.textContent = asked.length ? "I couldn't turn that into a change yet. I've sent it to the team: " + asked.join("; ")
+      : same.length ? "Nothing to change. " + same.join(" ")
+      : guide ? ""
+      : "I didn't find anything in that to change, so I didn't remake the video. Tell me what to change, for example \"make the captions bigger\".";
+    return false;
+  }
+  version += 1;
+  pendingApplied = r.applied || [];
+  pendingNote = r.unsupported || [];
+  show("working"); setStep(1, "Remaking with your changes");
+  try { localStorage.setItem("lastJob", r.job_id); } catch (_) {}
+  poll(r.job_id);
+  return true;
+}
+async function sendFeedback(remake, plan) {
+  const body = { changes: remake ? { ...changes(), ...planExtra } : {}, remember: $("remember").checked, comment: $("comment").value, remake,
+                 by_hand_minutes: +$("byHand").value || null, ...(plan ? { plan } : {}) };
+  $("fbErr").textContent = "";
+  $("fbGuide").classList.add("hidden");
+  const r = await askRemake(body, $("fbErr"));
+  if (r && !remake) { $("sendOnly").textContent = "Thanks! Sent ✓"; $("comment").value = ""; $("byHand").value = ""; syncSend(); }
+  return r;
+}
+
+// ---------- the plain preview before a remake ----------
+// A typed note is shown back to her in plain words first ("I will: ... I'll keep: ... I can't: ..."), with Confirm and
+// Back; a vague note gets one question instead of a guess. Button-only changes skip it: the "Will change:" line above
+// the button already says exactly what they do, and buttons are never a guess.
+let planToken = null, planExtra = {}, planAnswered = [];
+function closePlan() {
+  $("plan").classList.add("hidden"); $("remake").classList.remove("hidden");
+  planToken = null; planExtra = {}; planAnswered = [];
+}
+const firstUp = t => t ? t[0].toUpperCase() + t.slice(1) : t;
+function planList(head, items, cls) {
+  return items.length ? `<p class="plan-h">${head}</p><ul class="${cls}">${items.map(t => `<li>${esc(firstUp(t))}</li>`).join("")}</ul>` : "";
+}
+async function previewRemake() {
+  $("fbErr").textContent = ""; $("fbGuide").classList.add("hidden");
+  const body = { changes: { ...changes(), ...planExtra }, comment: $("comment").value, answered: planAnswered };
+  let res, r;
+  $("remake").disabled = true;
+  try {
+    res = await fetch(`/api/jobs/${jobId}/feedback/preview`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    r = await res.json().catch(() => ({}));
+  } catch (_) {
+    $("fbErr").textContent = "The Video Maker computer isn't answering right now. Nothing was lost. Try again in a minute. " + helpSentence();
+    return;
+  } finally { $("remake").disabled = false; }
+  if (!res.ok) { $("fbErr").textContent = r.detail || "I couldn't read that just now. Please try again."; return; }
+  const will = r.will || [], q = r.question;
+  if (!will.length && !q) {   // nothing the video can change: the same answer as always (and the note reaches the team)
+    const extra = planExtra; closePlan(); planExtra = extra;
+    await sendFeedback(true, r.plan); planExtra = {};
+    return;
+  }
+  planToken = r.plan;
+  $("planBody").innerHTML = planList("I will:", will, "plan-will")
+    + planList("I'll keep:", r.keep || [], "plan-keep")
+    + planList("I can't do this (I'll send it to the team):", r.cant || [], "plan-cant")
+    + planList("Already that way:", (r.already || []).map(t => t.replace(/^Already (that way|as far as it goes):\s*/, "").replace(/\.$/, "")), "plan-already")
+    + planList("You can do this yourself:", r.guide || [], "plan-guide");
+  $("planAsk").classList.toggle("hidden", !q);
+  $("planOpts").innerHTML = "";
+  if (q) {
+    $("planQ").textContent = q.text;
+    q.options.forEach(o => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.textContent = o.label;
+      b.onclick = () => { planExtra = { ...planExtra, ...o.changes }; planAnswered = [...planAnswered, q.group]; previewRemake(); };
+      $("planOpts").appendChild(b);
+    });
+  }
+  $("planGo").disabled = !!q;
+  $("planGo").textContent = q ? "Answer the question first" : "Confirm";
+  $("plan").classList.remove("hidden"); $("remake").classList.add("hidden");
+  $("planHead").focus({ preventScroll: true });
+  $("plan").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+}
+$("planBack").onclick = () => { closePlan(); $("comment").focus(); };
+$("planGo").onclick = async () => {
+  if (!planToken) return;
+  $("planGo").disabled = true;
+  const token = planToken, extra = planExtra;
+  $("plan").classList.add("hidden"); $("remake").classList.remove("hidden");
+  planExtra = extra;
+  const ok = await sendFeedback(true, token);
+  planToken = null; planExtra = {}; planAnswered = [];
+  if (!ok) $("planGo").disabled = false;
+};
+$("remake").onclick = () => { if (!$("comment").value.trim()) return sendFeedback(true); closePlan(); previewRemake(); };
+$("sendOnly").onclick = () => sendFeedback(false);
+// "Back to normal": forget what she saved for future videos (only her own)
+$("backNormal").onclick = () => { $("normalAsk").classList.remove("hidden"); $("normalMsg").classList.add("hidden"); };
+$("normalNo").onclick = () => $("normalAsk").classList.add("hidden");
+$("normalYes").onclick = async () => {
+  $("normalAsk").classList.add("hidden");
+  let ok = false;
+  try { ok = (await fetch("/api/prefs", { method: "DELETE" })).ok; } catch (_) {}
+  $("normalMsg").textContent = ok ? "Done. Your next videos start from the normal settings." : "I couldn't do that just now. Please try again.";
+  $("normalMsg").classList.remove("hidden");
+};
+
+// ---------- result page helpers: trust line, compare versions, review timer ----------
+// The trust line comes from the server (saved clip-matching scores), never worked out here.
+function drawReviewHelpers(id, r) {
+  closeCompare();
+  const t = !r.example && r.trust && r.trust.text;
+  $("trustLine").textContent = t || "";
+  $("trustLine").classList.toggle("hidden", !t);
+  const prev = !r.example && r.previous;
+  $("compareBtn").classList.toggle("hidden", !prev);
+  if (prev) $("compareBtn").textContent = `Compare with version ${Math.max(1, (r.version || version) - 1)}`;
+  $("reviewRow").classList.toggle("hidden", !!r.example);
+  drawTimer(id, r.review_minutes);
+}
+
+// Compare: the version before and this one, one above the other on a phone, side by side on a wide screen.
+// One play/pause for both, started together from the same moment. Nothing plays until she taps Play.
+const CMP = { on: false, id: null };
+function cmpVideos() { return [$("cmpOld"), $("cmpNew")]; }
+function cmpLen() { const [a, b] = cmpVideos(); return Math.max(a.duration || 0, b.duration || 0); }
+function cmpSet(t) {
+  const [a, b] = cmpVideos();
+  for (const v of [a, b]) if (Number.isFinite(v.duration) && v.duration > 0) v.currentTime = Math.min(Math.max(0, t), v.duration);
+  $("cmpSeek").value = t; $("cmpTime").textContent = mmss(t);
+}
+function cmpPause() { cmpVideos().forEach(v => v.pause()); $("cmpPlay").textContent = "Play both"; }
+async function cmpPlay() {
+  const [a, b] = cmpVideos();
+  let t = +$("cmpSeek").value || 0;
+  if (t >= cmpLen() - 0.05) t = 0;
+  cmpSet(t);
+  $("cmpPlay").textContent = "Pause both";
+  try { await Promise.all([a, b].filter(v => t < v.duration - 0.05).map(v => v.play())); } catch (_) { cmpPause(); }
+}
+function openCompare() {
+  if (!R || !R.r.previous) return;
+  const main = document.querySelector("#players video");
+  const from = main ? main.currentTime || 0 : 0;
+  if (main) main.pause();
+  const [a, b] = cmpVideos(), n = R.r.version || version;
+  CMP.on = true; CMP.id = R.id;
+  a.muted = true; b.muted = false;   // two voices at once is noise: she hears the newer version only
+  a.src = `/api/jobs/${R.r.previous}/${R.r.previous_file || "final.mp4"}`;
+  b.src = `/api/jobs/${R.id}/${R.parts[0].file}`;
+  $("cmpOldCap").textContent = `Version ${n - 1} (before)`;
+  $("cmpNewCap").textContent = `Version ${n} (now)`;
+  $("cmpNote").classList.add("hidden");
+  $("cmpPlay").textContent = "Play both";
+  let ready = 0;
+  const onMeta = () => {
+    if (++ready < 2) return;
+    $("cmpSeek").max = cmpLen().toFixed(1);
+    cmpSet(from);
+    const [x, y] = cmpVideos();
+    if (Math.abs((x.duration || 0) - (y.duration || 0)) > 0.5) {
+      const shorter = x.duration < y.duration ? `Version ${n - 1}` : `Version ${n}`;
+      $("cmpNote").textContent = `${shorter} is shorter (${mmss(Math.min(x.duration, y.duration))}), so it stops first.`;
+      $("cmpNote").classList.remove("hidden");
+    }
+  };
+  [a, b].forEach(v => v.addEventListener("loadedmetadata", onMeta, { once: true }));
+  $("compareCard").classList.remove("hidden");
+  $("compareBtn").setAttribute("aria-expanded", "true");
+  $("compareCard").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+function closeCompare() {
+  CMP.on = false;
+  cmpVideos().forEach(v => { v.pause(); v.removeAttribute("src"); v.load(); });
+  $("compareCard").classList.add("hidden");
+  $("compareBtn").setAttribute("aria-expanded", "false");
+}
+$("compareBtn").onclick = () => CMP.on ? closeCompare() : openCompare();
+$("cmpClose").onclick = () => { closeCompare(); $("compareBtn").focus(); };
+$("cmpPlay").onclick = () => (cmpVideos().every(v => v.paused) ? cmpPlay() : cmpPause());
+$("cmpSeek").oninput = () => { cmpPause(); cmpSet(+$("cmpSeek").value); };
+// keep the two together: the newer version leads, the older one follows if it drifts
+$("cmpNew").addEventListener("timeupdate", () => {
+  const [a, b] = cmpVideos();
+  if (!CMP.on) return;
+  $("cmpSeek").value = b.currentTime; $("cmpTime").textContent = mmss(b.currentTime);
+  if (!b.paused && !a.ended && b.currentTime < (a.duration || 0) - 0.1 && Math.abs(a.currentTime - b.currentTime) > 0.25) a.currentTime = b.currentTime;
+});
+cmpVideos().forEach(v => v.addEventListener("ended", () => {
+  const [a, b] = cmpVideos();
+  if ([a, b].every(x => x.ended || x.currentTime >= x.duration - 0.05)) cmpPause();
+}));
+$("cmpOld").addEventListener("timeupdate", () => {
+  if (CMP.on && $("cmpNew").ended) { const t = $("cmpOld").currentTime; $("cmpSeek").value = t; $("cmpTime").textContent = mmss(t); }
+});
+
+// "Time my review": a stopwatch she starts and stops. Only the minutes are saved, with this video.
+const TIMER = { tick: null, memory: {} };
+function timerKey(id) { return "reviewTimer:" + id; }
+function timerRead(k) { return +store.get(k) || TIMER.memory[k] || 0; }
+function timerSave(k, v) { TIMER.memory[k] = v; store.set(k, String(v)); }
+function timerClear(k) { delete TIMER.memory[k]; store.del(k); }
+const fmtMin = m => (m < 1 ? "under a minute" : `${Math.round(m * 10) / 10} minutes`);
+function drawTimer(id, saved) {
+  clearInterval(TIMER.tick);
+  const started = timerRead(timerKey(id)), pending = timerRead(timerKey(id) + ":pending");
+  $("timerBtn").setAttribute("aria-pressed", String(!!started && !pending));
+  if (pending) {
+    $("timerBtn").textContent = "Retry saving time";
+    $("timerTxt").textContent = `Not saved yet: ${mmss(pending)} of review. Tap Retry saving time.`;
+  } else if (!started) {
+    $("timerBtn").textContent = "Time my review";
+    $("timerTxt").textContent = saved != null ? `You've timed ${fmtMin(saved)} on this version so far.`
+      : "Start it when you start watching, stop it when you're done. It helps us measure how long reviewing takes.";
+  } else {
+    $("timerBtn").textContent = "Stop the timer";
+    const show = () => { $("timerTxt").textContent = `Timing your review: ${mmss((Date.now() - started) / 1000)}`; };
+    show(); TIMER.tick = setInterval(show, 1000);
+  }
+}
+$("timerBtn").onclick = async () => {
+  if (!R || R.r.example) return;
+  const id = R.id, k = timerKey(id), started = timerRead(k);
+  if (!started) { timerSave(k, Date.now()); return drawTimer(id, R.r.review_minutes); }
+  const seconds = timerRead(k + ":pending") || Math.min(Math.round((Date.now() - started) / 1000), 4 * 3600);
+  if (seconds < 1) { timerClear(k); return drawTimer(id, R.r.review_minutes); }
+  timerSave(k + ":pending", seconds); clearInterval(TIMER.tick);
+  $("timerBtn").disabled = true;
+  let res = null, out = {};
+  try {
+    res = await fetch(`/api/jobs/${id}/review-time`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seconds, session_id: String(started) }) });
+    out = await res.json().catch(() => ({}));
+  } catch (_) {}
+  $("timerBtn").disabled = false;
+  if (!res || !res.ok) { drawTimer(id, R.r.review_minutes); return; }
+  timerClear(k); timerClear(k + ":pending");
+  R.r.review_minutes = out.review_minutes;
+  drawTimer(id, out.review_minutes);
+  $("timerTxt").textContent = `Saved: ${mmss(seconds)} of review (all your timing on this version: ${fmtMin(out.review_minutes)}).`;
+};
+
+// ---------- upload page: the settings she saved, and the first-run tips ----------
+function drawSaved(list) {
+  $("savedList").innerHTML = (list || []).map(t => `<li>${esc(t)}</li>`).join("");
+  $("savedCard").classList.toggle("hidden", !(list || []).length);
+  $("savedMsg").classList.add("hidden");
+  $("savedReset").classList.remove("hidden"); $("savedLead").classList.remove("hidden");
+}
+$("savedReset").onclick = async () => {
+  let ok = false;
+  try { ok = (await fetch("/api/prefs", { method: "DELETE" })).ok; } catch (_) {}
+  $("savedMsg").textContent = ok ? "Done. Your next video starts from the normal settings." : "I couldn't do that just now. Please try again.";
+  $("savedMsg").classList.remove("hidden");
+  if (ok) { $("savedList").innerHTML = ""; $("savedReset").classList.add("hidden"); $("savedLead").classList.add("hidden"); if (!noiseTouched) $("denoise").checked = false; }
+};
+$("tipsDone").onclick = async () => {
+  $("tipsDone").disabled = true;
+  let ok = false;
+  try { ok = (await fetch("/api/tips-seen", { method: "POST" })).ok; } catch (_) {}
+  $("tipsDone").disabled = false;
+  $("tipsCard").classList.toggle("hidden", ok);
+  $("tipsMsg").textContent = ok ? "" : "I couldn't save that just now. Please try again.";
+};
+
+
+// ---------- the example video ----------
+// showExample() opens the example result read-only. It uses the SAME finish() as a real video: finish() sees
+// r.example === true (and r.video_urls / r.thumb_url) and draws the page without the buttons that change or remove
+// anything. Anything on the result page that should not appear on the example just gets the class "no-example".
+function showExample() {
+  if (!demoJob) return;
+  finish("example", demoJob);
+  document.title = "Example · " + TITLE;
+}
+$("exampleBtn").onclick = showExample;
+$("exampleLeave").onclick = () => { location.href = "/"; };
+fetch("/api/demo").then(r => r.ok ? r.json() : null).then(d => {
+  if (d && d.available && d.job) { demoJob = d.job; render(); }
+}).catch(() => {});
+
+// ---------- what kind of video, what to film, ideas ----------
+let formats = [];
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+function ticks(id) {   // the boxes she ticked for this kind of video today (a new day starts clean)
+  try { const j = JSON.parse(store.get("film:" + id) || "null"); if (j && j.d === today() && Array.isArray(j.t)) return j.t; } catch (_) {}
+  return [];
+}
+function drawFilm() {
+  const f = formats.find(x => x.id === $("kind").value);
+  const box = $("film");
+  box.classList.toggle("hidden", !f);
+  if (!f) return;
+  const on = ticks(f.id);
+  $("filmList").innerHTML = f.film_list.map((t, i) => `<label><input type="checkbox" data-i="${i}" ${on.includes(i) ? "checked" : ""}><span>${esc(t)}</span></label>`).join("");
+  $("filmList").querySelectorAll("input").forEach(c => c.onchange = () => {
+    const t = [...$("filmList").querySelectorAll("input:checked")].map(x => +x.dataset.i);
+    store.set("film:" + f.id, JSON.stringify({ d: today(), t }));
+  });
+}
+$("kind").onchange = () => { drawFilm(); if ($("kind").value !== "auto") $("film").open = true; };
+fetch("/api/formats").then(r => r.ok ? r.json() : []).then(list => {
+  if (!Array.isArray(list) || !list.length) return;
+  formats = list;
+  $("kind").insertAdjacentHTML("beforeend", list.map(f => `<option value="${esc(f.id)}">${esc(f.label)}</option>`).join(""));
+  $("kindCard").classList.remove("hidden");
+}).catch(() => {});
+
+function drawIdeas(list) {
+  $("ideas").innerHTML = "";
+  list.forEach(i => {
+    const d = document.createElement("div");
+    d.className = "idea";
+    const f = formats.find(x => x.id === i.format);
+    d.innerHTML = `<b></b><div class="muted"></div><ul></ul><button class="lite">Use this idea</button>`;
+    d.querySelector("b").textContent = i.title;
+    d.querySelector(".muted").textContent = f ? f.label : "";
+    (i.shots || []).forEach(s => { const li = document.createElement("li"); li.textContent = s; d.querySelector("ul").appendChild(li); });
+    d.querySelector("button").onclick = () => {
+      if (f) { $("kind").value = f.id; drawFilm(); $("film").open = true; $("kind").scrollIntoView({ behavior: "smooth", block: "center" }); }
+    };
+    $("ideas").appendChild(d);
+  });
+}
+$("ideasBtn").onclick = async () => {
+  const b = $("ideasBtn"), m = $("ideasMsg");
+  b.disabled = true; m.textContent = "Thinking of ideas…"; m.classList.remove("hidden", "warn");
+  try {
+    const r = await fetch("/api/ideas?n=5");
+    if (!r.ok) throw new Error("no");
+    const j = await r.json();
+    if (!Array.isArray(j.ideas) || !j.ideas.length) throw new Error("none");
+    drawIdeas(j.ideas);
+    m.textContent = "Ideas for this week. Use one or ignore them.";
+  } catch (_) {
+    m.textContent = "I couldn't come up with ideas just now. Try again in a moment.";
+    m.classList.add("warn");
+  }
+  b.disabled = false;
+};
+
+// ---------- shot list: what to film for the words she plans to say ----------
+fetch("/api/shotlist/sources").then(r => r.ok ? r.json() : null).then(j => {
+  if (!j || !Array.isArray(j.videos) || !j.videos.length) return;
+  j.videos.forEach(v => { const o = document.createElement("option"); o.value = v.job_id; o.textContent = v.title; $("shotReuse").appendChild(o); });
+  $("shotReuseWrap").classList.remove("hidden");
+}).catch(() => {});
+$("shotReuse").onchange = () => { if ($("shotReuse").value) $("shotText").value = ""; };
+$("shotText").oninput = () => { if ($("shotText").value.trim()) $("shotReuse").value = ""; };
+function drawFilmList(j) {
+  const ol = $("planList"), tips = $("shotTips");
+  ol.innerHTML = ""; tips.innerHTML = "";
+  (j.shots || []).forEach(s => {
+    const li = document.createElement("li");
+    const b = document.createElement("b"); b.textContent = `“${s.phrase}”`;
+    const sp = document.createElement("span"); sp.textContent = `${s.film} About ${s.seconds} seconds.`;
+    li.append(b, sp); ol.appendChild(li);
+  });
+  (j.warnings || []).forEach(w => { const li = document.createElement("li"); li.className = "fh"; li.textContent = w; tips.appendChild(li); });
+  if ((j.shots || []).length) (j.tips || []).forEach(t => { const li = document.createElement("li"); li.textContent = t; tips.appendChild(li); });
+  tips.classList.toggle("hidden", !tips.children.length);
+}
+$("shotBtn").onclick = async () => {
+  const b = $("shotBtn"), m = $("shotMsg");
+  const text = $("shotText").value.trim(), job = $("shotReuse").value;
+  m.classList.remove("hidden", "warn");
+  if (!text && !job) { m.textContent = "Type or paste what you plan to say first."; m.classList.add("warn"); $("shotText").focus(); return; }
+  drawFilmList({});
+  b.disabled = true; m.textContent = "Reading your words…";
+  try {
+    const r = await fetch("/api/shotlist", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(job ? { job_id: job } : { text }) });
+    if (!r.ok) throw new Error("no");
+    const j = await r.json();
+    drawFilmList(j);
+    const n = (j.shots || []).length;
+    m.textContent = n ? `${n} shot${n === 1 ? "" : "s"} to film, in the order you say them. Use them or ignore them.`
+      : "I didn't find things to film in those words. Name what you will show, like “the deck” or “the kitchen”.";
+  } catch (_) {
+    m.textContent = "I couldn't make the list just now. Try again in a moment.";
+    m.classList.add("warn");
+  }
+  b.disabled = false;
+};
+
+// ---------- header ----------
+$("acctBtn").onclick = e => {
+  e.stopPropagation();
+  const open = $("acctMenu").classList.toggle("hidden") === false;
+  $("acctBtn").setAttribute("aria-expanded", open);
+};
+document.addEventListener("click", () => { $("acctMenu").classList.add("hidden"); $("acctBtn").setAttribute("aria-expanded", "false"); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("acctMenu").classList.add("hidden"); });
+$("navNew").onclick = e => {   // on the first screen this must not wipe the clips she has just picked
+  if (!$("pick").classList.contains("hidden")) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+};
+$("signout").onclick = async () => { await fetch("/api/logout", { method: "POST" }); location.href = "/login"; };
+
+render();
+fetch("/api/me").then(r => r.ok ? r.json() : null).then(m => {
+  if (!m) return;
+  help = m.help || "";
+  $("helpLine").textContent = helpSentence();
+  $("tipsCard").classList.toggle("hidden", !m.show_tips);   // a new account, once: closing it is remembered on the server
+  if (!m.local) {
+    $("navUser").textContent = m.user;
+    $("acct").classList.remove("hidden");
+    $("adminLink").classList.toggle("hidden", !m.admin);
+  }
+}).catch(() => {});
+// Start the noise checkbox from her saved choice (off unless she saved it on)
+// ...unless she already ticked it herself before the answer arrived
+let noiseTouched = false, duckTouched = false;
+$("musicDuck").onchange = () => { duckTouched = true; };
+$("denoise").onchange = () => { noiseTouched = true; };
+fetch("/api/prefs").then(r => r.ok ? r.json() : {}).then(p => {
+  drawSaved(p.saved);
+  if (!noiseTouched) $("denoise").checked = !!p.denoise;
+  if (!duckTouched) $("musicDuck").checked = !!p.music_duck;
+  if (!musicTouched && typeof p.music === "string") { uploadMusic = p.music; drawUploadMusic(); }   // her remembered music
+}).catch(() => {});
+
+// ---------- music: the installed tracks, a 10-second preview of each, her choice ----------
+let TRACKS = [], musicTouched = false, uploadMusic = "", fbReport = null;
+const player = new Audio(); player.preload = "none";
+let playingBtn = null;
+function stopPreview() {
+  player.pause();
+  if (playingBtn) { playingBtn.setAttribute("aria-pressed", "false"); playingBtn.textContent = "Play"; playingBtn = null; }
+}
+player.onended = stopPreview;
+player.onerror = () => { const b = playingBtn; if (b && player.getAttribute("src")) { stopPreview(); b.textContent = "Can't play"; } };
+function trackTitle(file) { const t = TRACKS.find(t => t.file === file); return t ? `"${t.title}"` + (t.artist ? ` by ${t.artist}` : "") : "a track"; }
+// rows: "Pick one for me", each installed track (with Play), and optionally "No music"
+function drawMusic(box, group, chosen, opts) {
+  stopPreview();
+  const rows = [["", opts.autoLabel || "Pick one for me", ""], ...TRACKS.map(t => [t.file, t.title, t.artist]), ...(opts.none ? [["none", "No music", ""]] : [])];
+  box.innerHTML = "";
+  rows.forEach(([value, title, artist], i) => {
+    const row = document.createElement("div"); row.className = "mrow";
+    row.innerHTML = `<label><input type="radio" name="${group}"><span>${esc(title)}${artist ? ` <span class="by">by ${esc(artist)}</span>` : ""}</span></label>`;
+    const input = row.querySelector("input");
+    input.value = value; input.checked = value === chosen;
+    input.onchange = () => opts.onPick(value);
+    if (value && value !== "none") {
+      const b = document.createElement("button"); b.type = "button"; b.className = "play"; b.textContent = "Play";
+      b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", `Play 10 seconds of ${title}`);
+      b.onclick = () => {
+        if (playingBtn === b) return stopPreview();
+        stopPreview();
+        player.src = `/api/music/${encodeURIComponent(value)}`;
+        playingBtn = b; b.setAttribute("aria-pressed", "true"); b.textContent = "Stop";
+        player.play().catch(() => { if (playingBtn === b) { stopPreview(); b.textContent = "Can't play"; } });
+      };
+      row.appendChild(b);
+    }
+    box.appendChild(row);
+  });
+}
+function drawUploadMusic() {
+  if (TRACKS.length) drawMusic($("musicList"), "upMusic", uploadMusic, { none: true, onPick: v => { musicTouched = true; uploadMusic = v; } });
+}
+// The Change panel: which track this video uses, and the choice of another one
+function drawFbMusic() {
+  const report = fbReport;
+  if (!report) return;
+  $("musicGroup").classList.toggle("hidden", !report.music && !TRACKS.length);
+  $("musicLevel").classList.toggle("hidden", !report.music);
+  $("fbMusicList").classList.toggle("hidden", !TRACKS.length);
+  if (!TRACKS.length) return;
+  const mine = cur.music_track && TRACKS.some(t => t.file === cur.music_track) ? cur.music_track : "";
+  const shown = pick.track !== undefined ? pick.track : report.music ? mine : null;
+  drawMusic($("fbMusicList"), "fbMusic", shown, {
+    autoLabel: report.music && !mine ? `Pick one for me (this video has ${trackTitle(report.music)})` : "Pick one for me",
+    onPick: v => {
+      pick.track = report.music && v === mine ? undefined : v;
+      if (pick.music === "off") { pick.music = undefined; document.querySelectorAll('.opt[data-k="music"]').forEach(x => x.classList.remove("on")); }
+      updateSummary();
+    },
+  });
+}
+const musicReady = fetch("/api/music").then(r => r.ok ? r.json() : {}).then(j => { TRACKS = j.tracks || []; }).catch(() => { TRACKS = []; })
+  .then(() => { $("musicPick").classList.toggle("hidden", !TRACKS.length); drawUploadMusic(); });
+
+// ---------- a quiet one-time hint to add this to the home screen ----------
+let installEvent = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; if (!$("install").classList.contains("hidden")) $("installGo").classList.remove("hidden"); });
+function installHint() {
+  if (store.get("installHint")) return;
+  const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+  const ua = navigator.userAgent, ios = /iphone|ipad|ipod/i.test(ua), phone = ios || /android/i.test(ua);
+  if (standalone || !phone || $("pick").classList.contains("hidden")) return;
+  $("installText").textContent = ios ? "To open this in one tap, tap the Share button, then Add to Home Screen."
+    : "To open this in one tap, add it to your home screen from your browser's menu.";
+  if (installEvent) $("installGo").classList.remove("hidden");
+  $("install").classList.remove("hidden");
+  store.set("installHint", "1");   // shown once
+}
+$("installNo").onclick = () => $("install").classList.add("hidden");
+$("installGo").onclick = async () => { try { installEvent.prompt(); await installEvent.userChoice; } catch (_) {} $("install").classList.add("hidden"); };
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+
+// A shared link (?job=ID) or coming back after closing the tab: pick that video up again.
+{
+  const shared = new URLSearchParams(location.search).get("job"), last = shared || store.get("lastJob");
+  if (last) fetch(`/api/jobs/${last}`).then(async res => {
+    const r = res.ok ? await res.json().catch(() => null) : null;
+    if (!r || !r.status) {
+      store.del("lastJob");
+      if (shared) { notes = ["We can't find that video any more. Please add your clips again."]; render(); }
+      return installHint();
+    }
+    show(r.status === "done" ? "done" : "working"); poll(last);
+  }).catch(() => installHint());
+  else setTimeout(installHint, 800);
+}
+</script>
+</body>
+</html>

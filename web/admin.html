@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team page · Video Maker</title>
+<meta name="theme-color" content="#2c76ae">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f7fb; --bg2: #e7eff7; --card: #ffffff; --ink: #1f1f1f; --muted: #54595f; --line: #dbe5ee;
+    --accent: #2c76ae; --accent-ink: #fff; --accent-soft: #e3f0fa; --warn: #8a5300; --warn-soft: #fbf0dc;
+    --bad: #a3281f; --bad-soft: #fbe7e4; --shadow: 0 1px 2px rgba(20,50,80,.05), 0 8px 24px rgba(20,50,80,.07);
+    --serif: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1620; --bg2: #131d29; --card: #172230; --ink: #e9eff5; --muted: #9fb0c0; --line: #2a3a4b;
+      --accent: #6caedf; --accent-ink: #0b1a28; --accent-soft: #1c2f42; --warn: #e8b86a; --warn-soft: #362c1b;
+      --bad: #f08a80; --bad-soft: #3a2220; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; color: var(--ink); font: 15px/1.5 var(--sans); background: var(--bg); }
+  main { max-width: 760px; margin: 0 auto; padding: 16px 16px 64px; }
+  h1 { font: 650 28px/1.2 var(--serif); margin: 0 0 4px; }
+  h2 { font: 650 20px/1.3 var(--serif); margin: 28px 0 10px; }
+  a { color: inherit; }
+  .muted { color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .meta { font-size: 13px; color: var(--muted); }
+  .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 9px; border-radius: 99px; background: var(--warn-soft); color: var(--warn); }
+  .tag.ok { background: var(--accent-soft); color: var(--accent); }
+  .tag.bad { background: var(--bad-soft); color: var(--bad); }
+  .btn { font: 600 15px var(--sans); padding: 10px 16px; border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+  .btn.small { padding: 7px 12px; font-size: 14px; }
+  .btn:disabled { opacity: .6; }
+  input, select { font: inherit; color: var(--ink); background: transparent; border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; width: 100%; }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  select option { color: #1f1f1f; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+  label.check { display: flex; align-items: center; gap: 8px; font-weight: 500; margin-top: 12px; }
+  label.check input { width: auto; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  blockquote { margin: 8px 0; padding-left: 10px; border-left: 3px solid var(--line); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .fact { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .fact b { display: block; font: 650 20px/1.2 var(--serif); }
+  .fact span { font-size: 13px; color: var(--muted); }
+  .fact.warn { background: var(--warn-soft); } .fact.warn b { color: var(--warn); }
+  .msg { font-size: 14px; margin-top: 8px; min-height: 1.3em; }
+  .msg.bad { color: var(--bad); } .msg.good { color: var(--accent); }
+  details > summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted); }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.45 ui-monospace, Consolas, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin: 8px 0 0; }
+  .pw { position: relative; }
+  .pw input { padding-right: 56px; }
+  .peek { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; margin: 0; padding: 0;
+          display: grid; place-items: center; background: transparent; color: var(--muted); border: 0; border-radius: 8px;
+          cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .peek:hover, .peek.held { color: var(--ink); background: rgba(127,127,127,.15); }
+  .hidden { display: none !important; }
+  /* easy to hit with a thumb: every tap target is at least 44 px */
+  .btn, .btn.small { min-height: 44px; }
+  p.muted a { display: inline-block; padding: 12px 4px; }
+  summary { padding: 12px 0; cursor: pointer; }
+  label.check { min-height: 44px; }
+  label.check input { width: 22px; height: 22px; flex: none; }
+  input, select { min-height: 44px; }
+  /* shared top bar (same as the start page): New video, My videos, and an account menu */
+  .nav { display: flex; align-items: center; gap: 2px; min-height: 52px; max-width: 760px; margin: 0 auto; padding: 4px 8px 0; position: relative; }
+  .nav .grow { flex: 1; }
+  .nav a, .nav .navbtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: none;
+                          color: var(--ink); font: 600 15px var(--sans); text-decoration: none; cursor: pointer; }
+  .nav a:hover, .nav .navbtn:hover { background: var(--accent-soft); }
+  .nav a.cur { color: var(--accent); background: var(--accent-soft); }
+  .menu { position: absolute; right: 8px; top: 52px; z-index: 5; min-width: 170px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 4px; }
+  .menu a, .menu button { display: flex; width: 100%; min-height: 44px; align-items: center; border-radius: 8px; }
+  .navuser { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hidden { display: none !important; }
+
+  /* Top bar: one floating pill on every page (after Navbar Gallery: Supaste's floating capsule, IntegratedBio's grouped links) */
+  .nav { position: sticky; top: 8px; z-index: 30; max-width: 760px; margin: 8px auto 4px; padding: 5px; min-height: 58px; gap: 6px;
+         background: var(--card); background: color-mix(in srgb, var(--card) 86%, transparent);
+         -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+         border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 8px 28px rgba(20, 45, 75, .08); }
+  @media (max-width: 800px) { .nav { margin: 8px 12px 4px; } }
+  .nav .logo { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%;
+               background: var(--accent); color: var(--accent-ink); }
+  .nav .logo:hover { background: var(--accent); filter: brightness(1.08); }
+  .nav .seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 999px; background: var(--accent-soft); }
+  .nav .seg a { border-radius: 999px; padding: 0 16px; white-space: nowrap; }
+  .nav .seg a:hover { background: transparent; color: var(--accent); }
+  .nav .seg a.cur { background: var(--card); color: var(--accent); box-shadow: 0 1px 4px rgba(20, 45, 75, .14); }
+  .nav .navbtn { border-radius: 999px; }
+  .menu { top: 62px; border-radius: 16px; }
+  @media (max-width: 420px) { .nav .seg a { padding: 0 11px; font-size: 14px; } .navuser { max-width: 64px; } }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+<link rel="stylesheet" href="/static/lenis.css">
+<script defer src="/static/gsap.min.js"></script>
+<script defer src="/static/lenis.min.js"></script>
+<script defer src="/static/motion.js"></script>
+</head>
+<body>
+<nav class="nav" id="nav" aria-label="Main">
+  <a href="/" class="logo" aria-label="Alex's Video Maker: make a new video"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2.5"/><path d="M16 10l5-3v10l-5-3z"/></svg></a>
+  <span class="seg"><a href="/" id="navNew">Make a video</a><a href="/videos" id="navVideos">My videos</a></span>
+  <span class="grow"></span>
+  <span id="acct" class="hidden">
+    <button class="navbtn" id="acctBtn" aria-haspopup="true" aria-expanded="false"><span class="navuser" id="navUser"></span>&nbsp;&#9662;</button>
+    <div class="menu hidden" id="acctMenu"><a href="/admin" id="adminLink" class="hidden cur">Team page</a><button class="navbtn" id="navSignout">Sign out</button></div>
+  </span>
+</nav>
+<main>
+  <h1>Team page</h1>
+  <div id="sceneSlot" data-scene3d="skyline" aria-hidden="true" style="margin-top:12px"></div>
+
+  <h2>How things are</h2>
+  <div class="card">
+    <div class="facts" id="health"><span class="muted">Loading…</span></div>
+    <div class="meta" id="healthNote" style="margin-top:10px"></div>
+  </div>
+
+  <h2>Results for the class report</h2>
+  <div class="card" id="results"><span class="muted">Loading…</span></div>
+  <p class="meta" style="margin:8px 0 0"><a href="/api/admin/results.csv" download style="display:inline-flex;align-items:center;min-height:44px">Download these numbers as a spreadsheet</a></p>
+
+  <h2>Videos that didn't finish <span class="muted" id="failCount"></span></h2>
+  <div id="fails"><p class="muted">Loading…</p></div>
+
+  <h2>Requests <span class="muted" id="count"></span></h2>
+  <p class="muted" style="margin-top:0">Things people asked for that no setting can do.</p>
+  <div id="open"></div>
+  <details style="margin:8px 0 12px"><summary>For the developer</summary>
+    <p class="muted">Paste this list into a Claude session to have the code changed.</p>
+    <button id="copy" class="btn ghost small" type="button">Copy open requests</button>
+  </details>
+
+  <h2>Earlier requests</h2>
+  <div id="rest"></div>
+
+  <h2>People</h2>
+  <div id="users" class="muted"></div>
+
+  <h2>Add a person</h2>
+  <form class="card" id="addForm" autocomplete="off">
+    <label for="nu">Name to sign in with</label>
+    <input id="nu" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off" required>
+    <label for="np">Their first password (at least 8 characters)</label>
+    <div class="pw"><input id="np" type="password" autocomplete="new-password" minlength="8" required><button type="button" class="peek" data-for="np" title="Hold to see the password" aria-label="Hold to see the password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <label class="check"><input type="checkbox" id="na"> Can use this Team page</label>
+    <div class="msg" id="addMsg" role="status"></div>
+    <button class="btn" id="add">Add this person</button>
+  </form>
+
+  <h2>Reset a password</h2>
+  <form class="card" id="resetForm" autocomplete="off">
+    <label for="rn">Who</label>
+    <select id="rn"></select>
+    <label for="rp">Their new password (at least 8 characters)</label>
+    <div class="pw"><input id="rp" type="password" autocomplete="new-password" minlength="8" required><button type="button" class="peek" data-for="rp" title="Hold to see the password" aria-label="Hold to see the password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="msg" id="resetMsg" role="status"></div>
+    <button class="btn" id="reset">Save the new password</button>
+    <div class="meta" style="margin-top:8px">They will be signed out on their other phones and computers.</div>
+  </form>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+let items = [], users = {};
+const day = iso => { const d = new Date(iso); return isNaN(d) ? esc(iso || "") : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + " · " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); };
+const ago = iso => {
+  if (!iso) return "No videos yet";
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  return m < 1 ? "Just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} hours ago` : `${Math.round(m / 1440)} days ago`;
+};
+
+function card(it) {
+  const applied = (it.applied || []).length ? `<div class="meta">Changed for them: ${it.applied.map(esc).join(", ")}</div>` : "";
+  const open = it.status === "open";
+  return `<div class="card"><div class="meta">${day(it.time)} · ${esc(it.user)} · video ${esc(it.job)} · <span class="tag ${open ? "" : "ok"}">${open ? "Waiting" : "Done"}</span></div>
+    ${it.comment ? `<blockquote>${esc(it.comment)}</blockquote>` : ""}
+    ${(it.unsupported || []).length && it.comment !== it.unsupported[0] ? `<div>Can't do yet: ${it.unsupported.map(esc).join("; ")}</div>` : ""}
+    ${applied}
+    ${open ? `<div class="row"><button class="btn ghost small" data-id="${esc(it.id)}">Mark done</button></div>` : ""}</div>`;
+}
+
+async function loadHealth() {
+  try {
+    const r = await fetch("/api/admin/health");
+    if (!r.ok) throw 0;
+    const h = await r.json();
+    const f = (v, l, warn) => `<div class="fact${warn ? " warn" : ""}"><b>${v}</b><span>${l}</span></div>`;
+    $("health").innerHTML = [
+      f(`${h.disk_free_gb} GB`, "free space on the video computer", h.disk_free_gb < 10),
+      f(esc(ago(h.last_job_at)), "last video made"),
+      f(h.key_present ? "On" : "Off", h.key_present ? "AI helper has its key" : "AI helper has no key, plainer titles", !h.key_present),
+      f(h.jobs_total, "videos in total"),
+      f(h.jobs_failed, "didn't finish", h.jobs_failed > 0),
+      f(h.keep_awake ? "Yes" : "No", "computer kept awake"),
+    ].join("");
+    $("healthNote").textContent = h.help_contact_set ? "" : "No help line is set yet, so the sign-in page can't say who to ask.";
+  } catch (_) { $("health").innerHTML = '<span class="muted">Couldn\'t load this.</span>'; }
+}
+
+async function loadFails() {
+  try {
+    const r = await fetch("/api/admin/failures");
+    if (!r.ok) throw 0;
+    const f = (await r.json()).items || [];
+    $("failCount").textContent = f.length ? `(${f.length})` : "";
+    $("fails").innerHTML = f.map(x => `<div class="card"><div class="meta">${day(x.time)} · ${esc(x.user || "no account")} · video ${esc(x.job)} · <span class="tag bad">Didn't finish</span></div>
+      <div style="margin-top:6px">${esc(x.shown || "")}</div>
+      ${x.detail ? `<details style="margin-top:6px"><summary>Technical detail</summary><pre>${esc(x.detail)}</pre></details>` : ""}</div>`).join("")
+      || '<p class="muted">None. Every video has finished.</p>';
+  } catch (_) { $("fails").innerHTML = '<p class="muted">Couldn\'t load this.</p>'; }
+}
+
+async function load() {
+  const r = await fetch("/api/admin/feedback");
+  if (!r.ok) { document.body.innerHTML = '<main><p class="muted">This page is for the team only. <a href="/videos">Back to My videos</a></p></main>'; return; }
+  const d = await r.json();
+  items = d.items; users = d.users || {};
+  const open = items.filter(i => i.status === "open"), rest = items.filter(i => i.status !== "open" && (i.comment || (i.applied || []).length));
+  $("count").textContent = open.length ? `(${open.length})` : "";
+  $("open").innerHTML = open.map(card).join("") || '<p class="muted">Nothing waiting.</p>';
+  $("rest").innerHTML = rest.slice(0, 40).map(card).join("") || '<p class="muted">Nothing yet.</p>';
+  const names = Object.keys(users).sort();
+  $("users").textContent = names.map(n => n + (users[n].admin ? " (team page)" : "")).join(", ") || "No accounts yet.";
+  const keep = $("rn").value;
+  $("rn").innerHTML = names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  if (names.includes(keep)) $("rn").value = keep;
+  $("reset").disabled = !names.length;
+  document.querySelectorAll("button[data-id]").forEach(b => b.onclick = async () => { await fetch(`/api/admin/feedback/${b.dataset.id}/resolve`, { method: "POST" }); load(); });
+}
+$("copy").onclick = () => {
+  const t = items.filter(i => i.status === "open").map(i => `- [${i.user}, video ${i.job}] ${(i.unsupported || [i.comment]).join("; ")}`).join("\n");
+  navigator.clipboard.writeText("Open feedback to fix in the Alex video tool:\n" + t).then(() => { $("copy").textContent = "Copied"; setTimeout(() => $("copy").textContent = "Copy open requests", 1500); }).catch(() => {});
+};
+
+async function save(body, msgEl, okText) {
+  msgEl.className = "msg";
+  msgEl.textContent = "";
+  try {
+    const r = await fetch("/api/admin/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { msgEl.className = "msg bad"; msgEl.textContent = d.detail || "That didn't save. Please try again."; return false; }
+    msgEl.className = "msg good"; msgEl.textContent = okText(d.user);
+    return true;
+  } catch (_) { msgEl.className = "msg bad"; msgEl.textContent = "Can't reach the Video Maker right now."; return false; }
+}
+$("addForm").onsubmit = async e => {
+  e.preventDefault();
+  const name = $("nu").value.trim(), m = $("addMsg");
+  if (Object.keys(users).some(n => n.toLowerCase() === name.toLowerCase())) {
+    m.className = "msg bad"; m.textContent = `${name} already has an account. To change their password, use "Reset a password" below.`; return;
+  }
+  const body = { username: name, password: $("np").value }; if ($("na").checked) body.admin = true;
+  if (await save(body, m, u => `${u} can now sign in.`)) { $("addForm").reset(); load(); }
+};
+$("resetForm").onsubmit = async e => {
+  e.preventDefault();
+  if (await save({ username: $("rn").value, password: $("rp").value }, $("resetMsg"), u => `${u}'s password is changed.`)) { $("rp").value = ""; load(); }
+};
+async function loadResults() {
+  const box = $("results");
+  try {
+    const r = await fetch("/api/admin/results");
+    if (!r.ok) throw 0;
+    const groups = (await r.json()).groups.filter(g => g.videos > 0);
+    if (!groups.length) { box.innerHTML = '<span class="muted">No finished videos yet.</span>'; return; }
+    const vids = k => k === 1 ? "1 video" : `${k} videos`;
+    box.innerHTML = groups.map(g => `<div style="margin-bottom:16px">
+      <b>${g.user === "All" ? "Everyone" : esc(g.user)}</b>
+      <div class="facts" style="margin-top:8px">
+        <div class="fact"><b>${g.videos}</b><span>${g.videos === 1 ? "video" : "videos"} made (${g.remakes === 1 ? "1 remake" : g.remakes + " remakes"})</span></div>
+        <div class="fact"><b>${g.posted}</b><span>she marked as posted</span></div>
+        <div class="fact"><b>${g.best_week_made}</b><span>most videos in one week (goal 3 to 5)</span></div>
+        <div class="fact"><b>${g.avg_build_min == null ? "–" : g.avg_build_min + " min"}</b><span>the tool takes, on average</span></div>
+        <div class="fact"><b>${g.median_review_min == null ? "–" : g.median_review_min + " min"}</b><span>from ready to her first copy, download or posted tap (${vids(g.review_counted)})</span></div>
+        <div class="fact timed-review"><b>${g.median_timed_review_min == null ? "–" : g.median_timed_review_min + " min"}</b><span>review she timed herself with Time my review (${vids(g.timed_counted || 0)})</span></div>
+        <div class="fact"><b>${g.avg_by_hand_min == null ? "–" : g.avg_by_hand_min + " min"}</b><span>her estimate of editing by hand (${vids(g.by_hand_counted)})</span></div>
+        <div class="fact"><b>${g.avg_saved_min == null ? "–" : g.avg_saved_min + " min"}</b><span>saved per video (${g.saved_counted === 1 ? "1 video has" : g.saved_counted + " videos have"} all three numbers)</span></div>
+      </div>
+      <div class="meta" style="margin-top:6px">${g.weeks.length ? "By week: " + g.weeks.map(w => `${esc(w.week)}: made ${w.made}, posted ${w.posted}`).join(" · ") : ""}</div></div>`).join("") +
+      '<div class="meta">How this is worked out: "the tool takes" is its own clock. "From ready to first tap" only counts when she acted within 4 hours of the video being ready, because a video she opens the next day says nothing about how long review took. "Review she timed herself" is the stopwatch on the result page (the middle value, all versions of a video added up); it is the measured review time, only for videos she timed. "Her estimate" is her answer to the minutes question on the result page. "Saved" is her estimate minus the tool time minus the review time, only where all three exist, so treat it as an estimate and quote how many videos it rests on.</div>';
+  } catch (_) { box.innerHTML = '<span class="muted">Couldn' + String.fromCharCode(39) + 't load this.</span>'; }
+}
+load(); loadHealth(); loadFails(); loadResults();
+
+document.querySelectorAll(".peek").forEach(b => {
+  const input = document.getElementById(b.dataset.for);
+  const on = e => { e.preventDefault(); input.type = "text"; b.classList.add("held"); };
+  const off = () => { input.type = "password"; b.classList.remove("held"); };
+  b.addEventListener("pointerdown", on);
+  ["pointerup", "pointerleave", "pointercancel", "blur"].forEach(ev => b.addEventListener(ev, off));
+  b.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") on(e); });
+  b.addEventListener("keyup", off);
+  b.addEventListener("contextmenu", e => e.preventDefault());   // long-press on phones
+});
+</script>
+<script>
+// shared top bar: the account menu (who is signed in, Team page for admins, Sign out)
+(function () {
+  const g = id => document.getElementById(id);
+  g("acctBtn").onclick = e => { e.stopPropagation(); const open = g("acctMenu").classList.toggle("hidden") === false; g("acctBtn").setAttribute("aria-expanded", open); };
+  document.addEventListener("click", () => { g("acctMenu").classList.add("hidden"); g("acctBtn").setAttribute("aria-expanded", "false"); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") g("acctMenu").classList.add("hidden"); });
+  g("navSignout").onclick = async () => { await fetch("/api/logout", { method: "POST" }); location.href = "/login"; };
+  fetch("/api/me").then(r => r.ok ? r.json() : null).then(m => {
+    if (!m || m.local) return;
+    g("navUser").textContent = m.user;
+    g("acct").classList.remove("hidden");
+    g("adminLink").classList.toggle("hidden", !m.admin);
+  }).catch(() => {});
+})();
+</script>
+</body>
+</html>

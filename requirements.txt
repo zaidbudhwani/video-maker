@@ -1,0 +1,13 @@
+anthropic
+faster-whisper
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+mediapipe
+# scenedetect (skips shaky clip starts) is in requirements-nodeps.txt: it must be installed
+# with --no-deps after this file, see that file for why.
+# Noise removal uses the standalone deep-filter program in assets/tools/ (see README), NOT pip deepfilternet.
+
+# Website tests only (tests/e2e_site.py). After installing: venv\Scripts\python -m playwright install chromium
+playwright

@@ -1,0 +1,3 @@
+REPLACE THIS FILE only if a disclosure line should be added to every description.
+
+While this file starts with the word REPLACE, nothing is added.

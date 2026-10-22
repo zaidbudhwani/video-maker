@@ -1,0 +1,5 @@
+# Install with --no-deps AFTER requirements.txt:  pip install --no-deps -r requirements-nodeps.txt
+# scenedetect asks for opencv-python, which clashes with the opencv-contrib-python that mediapipe
+# brings and breaks cv2. It needs nothing else that isn't already installed. Optional: without it
+# voice-over videos are still made, clips just keep their shaky starts.
+scenedetect==0.7.1

@@ -1,0 +1,26 @@
+.env
+venv/
+__pycache__/
+out/
+samples/
+assets/music/
+*.mp4
+*.mov
+*.mp3
+*.m4a
+*.wav
+.DS_Store
+prefs.json
+assets/models/
+assets/tools/
+
+users.json
+secret.key
+users/
+local-login.txt
+tests/shots/
+yt/
+current-link.txt
+
+# motion libraries are installed with npm only to refresh web/vendor (see package.json)
+node_modules/

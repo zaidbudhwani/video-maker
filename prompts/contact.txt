@@ -1,0 +1,7 @@
+# Contact details. The tool uses this only to CHECK what is said in a video
+# (it warns if a phone number or website said aloud differs from the one below).
+# It never posts or sends anything.
+#
+# Fill in the phone line, then leave the website line empty (as "# website:") until you have a real address.
+phone: 555-010-0123
+# website:

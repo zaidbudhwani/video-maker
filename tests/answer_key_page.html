@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Answer Key</title>
+<style>
+:root { --bg:#fafaf8; --card:#fff; --ink:#1d1d1b; --muted:#5d5d58; --line:#d9d8d2; --accent:#1f5f8b; --yes:#1e6b3a; --no:#9b2c1f; --focus:#e0a100; }
+@media (prefers-color-scheme: dark) { :root { --bg:#161615; --card:#21211f; --ink:#f0efe9; --muted:#b0afa8; --line:#3a3a36; --accent:#7fb6dc; --yes:#7cc995; --no:#f08f80; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui, sans-serif; }
+header { padding:12px 16px; border-bottom:1px solid var(--line); display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
+h1 { font-size:20px; margin:0; }
+#status { color:var(--muted); }
+main { display:grid; grid-template-columns: minmax(220px, 320px) 1fr; gap:16px; padding:16px; }
+@media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+button { font:inherit; min-height:44px; min-width:44px; padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+button:focus-visible, video:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+#phrases { display:flex; flex-direction:column; gap:6px; max-height:80vh; overflow:auto; }
+#phrases button { text-align:left; }
+#phrases button[aria-current="true"] { border-color:var(--accent); border-width:2px; }
+#phrases .done { color:var(--muted); }
+#now { font-size:19px; margin:0 0 8px; }
+#grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; margin-top:12px; }
+.clip { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px; }
+.clip video { width:100%; max-height:300px; background:#000; border-radius:6px; }
+.choices { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.choices button[aria-pressed="true"].c1 { background:var(--yes); color:var(--card); border-color:var(--yes); }
+.choices button[aria-pressed="true"].c2 { background:var(--no); color:var(--card); border-color:var(--no); }
+.choices button[aria-pressed="true"].c0 { border-color:var(--ink); border-width:2px; }
+.help { color:var(--muted); margin:4px 0 0; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Answer key</h1>
+  <span id="who"></span>
+  <span id="status" role="status" aria-live="polite">Loading...</span>
+</header>
+<main>
+  <nav aria-label="Phrases"><div id="phrases"></div></nav>
+  <section aria-labelledby="now">
+    <p id="now"></p>
+    <div class="choices">
+      <button id="play" type="button">Play this part of the video</button>
+      <button id="prev" type="button">Previous phrase</button>
+      <button id="next" type="button">Next phrase</button>
+    </div>
+    <p class="help">For each clip: <b>Shows it</b> if the clip could be on screen while she says this phrase. <b>Wrong room</b> if
+      showing it would contradict what she says (a different room or thing). <b>Neither</b> otherwise. Every change is saved on this computer.</p>
+    <video id="final" controls preload="metadata" hidden></video>
+    <div id="grid"></div>
+  </section>
+</main>
+<script>
+let D = null, cur = 0, stopAt = null;
+const LABELS = [["Neither", 0], ["Shows it", 1], ["Wrong room", 2]];
+const $ = id => document.getElementById(id);
+
+function state(clip, p) {
+  const m = D.marks[clip] || {illustrates: [], contradicts: []};
+  return m.illustrates.includes(p) ? 1 : m.contradicts.includes(p) ? 2 : 0;
+}
+function setState(clip, p, v) {
+  const m = D.marks[clip] = D.marks[clip] || {illustrates: [], contradicts: []};
+  m.illustrates = m.illustrates.filter(x => x !== p);
+  m.contradicts = m.contradicts.filter(x => x !== p);
+  if (v === 1) m.illustrates.push(p);
+  if (v === 2) m.contradicts.push(p);
+  save();
+}
+async function save() {
+  $("status").textContent = "Saving...";
+  try {
+    const r = await fetch("/save", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({marks: D.marks})});
+    const j = await r.json();
+    $("status").textContent = r.ok ? "Saved" : ("Not saved: " + j.error);
+  } catch (e) { $("status").textContent = "Not saved: the page lost the connection to this computer's helper."; }
+  drawList();
+}
+function touched(p) { return D.clips.some(c => state(c, p) !== 0); }
+function drawList() {
+  const box = $("phrases"); box.textContent = "";
+  D.phrases.forEach((ph, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = (i + 1) + ". " + ph.text;
+    if (touched(i)) b.classList.add("done");
+    b.setAttribute("aria-current", i === cur ? "true" : "false");
+    b.onclick = () => { cur = i; draw(); };
+    box.appendChild(b);
+  });
+}
+function draw() {
+  const ph = D.phrases[cur];
+  $("now").textContent = `Phrase ${cur + 1} of ${D.phrases.length}: "${ph.text}"`;
+  drawList();
+  const g = $("grid"); g.textContent = "";
+  D.clips.forEach(c => {
+    const card = document.createElement("div"); card.className = "clip";
+    const v = document.createElement("video");
+    v.src = "/clip/" + encodeURIComponent(c); v.controls = true; v.muted = true; v.preload = "metadata";
+    v.setAttribute("aria-label", "Clip " + c);
+    const name = document.createElement("div"); name.textContent = c;
+    const ch = document.createElement("div"); ch.className = "choices"; ch.setAttribute("role", "group"); ch.setAttribute("aria-label", "Clip " + c);
+    LABELS.forEach(([t, val]) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.className = "c" + val;
+      b.setAttribute("aria-pressed", state(c, cur) === val ? "true" : "false");
+      b.onclick = () => { setState(c, cur, val); ch.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false")); };
+      ch.appendChild(b);
+    });
+    card.append(v, name, ch); g.appendChild(card);
+  });
+}
+$("prev").onclick = () => { if (cur > 0) { cur--; draw(); } };
+$("next").onclick = () => { if (cur < D.phrases.length - 1) { cur++; draw(); } };
+$("play").onclick = () => {
+  const v = $("final"), ph = D.phrases[cur];
+  if (!D.has_video) { $("status").textContent = "This job has no finished video to play."; return; }
+  v.hidden = false; v.currentTime = ph.start; stopAt = ph.end; v.play();
+};
+$("final").addEventListener("timeupdate", e => { if (stopAt !== null && e.target.currentTime >= stopAt) { e.target.pause(); stopAt = null; } });
+fetch("/data").then(r => r.json()).then(j => {
+  D = j;
+  $("final").src = "/video";
+  $("who").textContent = `Video: ${j.job}. Marking as: ${j.rater}.`;
+  $("status").textContent = j.saved ? "Your earlier marks are loaded." : "Nothing marked yet.";
+  draw();
+}).catch(() => { $("status").textContent = "Could not load this video's phrases. Is the helper still running?"; });
+</script>
+</body>
+</html>
