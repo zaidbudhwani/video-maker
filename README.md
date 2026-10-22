@@ -75,4 +75,4 @@ never who it suits. Never commit `.env`, `users.json`, `secret.key`, `yt/`, vide
 
 ## Credits
 
-Built by Zaid Budhwani, Joshua Mitchell and Braylon Lepa.
+Created by **Zaid Budhwani**, **Joshua Mitchell** and **Braylon Lepa**. Questions or ideas? Open an issue.
