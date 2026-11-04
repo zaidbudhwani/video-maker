@@ -10,7 +10,7 @@ from pathlib import Path
 
 from . import facecrop, ff, layout, settings, silence, transcribe
 from .assemble import ENCODE, FRAME, check_clip
-from .config import AUDIO_RATE, FPS, HEIGHT, MAX_SECONDS, SCALER, TONEMAP, WIDTH
+from .config import AUDIO_RATE, FPS, HEIGHT, SCALER, TONEMAP, WIDTH
 from .errors import AlexError, NoSpeechError
 
 MIN_PART = 15.0  # never make a part shorter than this unless the whole video is
@@ -120,7 +120,6 @@ def split_points(words, total):
     MAX_SECONDS = layout.max_seconds()   # noqa: N806
     if total <= MAX_SECONDS:
         return [(0.0, total)]
-    n = math.ceil(total / MAX_SECONDS)
     # a cut sits halfway through the pause after a sentence (or, failing that, any pause)
     sentence = [(w["end"] + words[i + 1]["start"]) / 2 for i, w in enumerate(words[:-1])
                 if w["word"].endswith((".", "?", "!"))]

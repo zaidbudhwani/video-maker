@@ -1,4 +1,4 @@
-"""The music bed sits UNDER her voice: the voice is the main thing, the music is background.
+r"""The music bed sits UNDER her voice: the voice is the main thing, the music is background.
 
 Run: venv\Scripts\python tests\test_music_mix.py
 Uses the real tracks in assets/music/ and her voice-over sample (samples/recipe/voice.m4a), all local. SKIPs when either is

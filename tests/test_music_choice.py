@@ -20,6 +20,10 @@ os.environ.update(ALEX_DATA_DIR=str(DATA), ALEX_HOSTED="1", ADMIN_USER="tester",
 from video_tool import music, pipeline, settings as S   # noqa: E402
 from video_tool.config import FFPROBE, MUSIC_DIR   # noqa: E402
 
+if not music.tracks():
+    print("SKIP: needs at least one track in assets/music/ (the tracks are copied by hand, see docs/MUSIC.md)")
+    sys.exit(0)
+
 FAILS = []
 
 

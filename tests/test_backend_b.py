@@ -429,7 +429,7 @@ else:
           and dm["job"]["example"] is True and "report" in dm["job"] and "copy" in dm["job"] and "transcript" in dm["job"]
           and dm["job"]["video_urls"] == ["/api/demo/video/1"] and dm["job"]["thumb_url"] == "/api/demo/thumb", list(dm["job"]))
     real = alex.get("/api/jobs/web-rec-1").json()
-    check("demo job has the same keys as a normal finished job (minus the optional ones)", set(real) - {"ai_prompt", "step"} <= set(dm["job"]), (set(real), set(dm["job"])))
+    check("demo job has the same keys as a normal finished job (minus the optional ones)", set(real) - {"ai_prompt", "step", "trust", "review_minutes", "version", "previous", "previous_file"} <= set(dm["job"]), (set(real), set(dm["job"])))
     r = alex.get("/api/demo/video/1")
     check("demo video plays (mp4 bytes)", r.status_code == 200 and r.headers["content-type"] == "video/mp4" and r.content[4:8] == b"ftyp", r.status_code)
     r = alex.get("/api/demo/video/1", headers={"range": "bytes=0-99"})

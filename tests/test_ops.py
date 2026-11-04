@@ -55,7 +55,7 @@ check("tunnel not installed -> 42", tunnel.main() == 42)
 # the files
 bat = (ROOT / "Start Website.bat").read_text(encoding="utf-8")
 check("start bat loops tunnel", ":tunnelloop" in bat and "goto tunnelloop" in bat)
-check("start bat loops server and logs", ":serverrun" in bat and "goto serverrun" in bat and "out\server.log" in bat)
+check("start bat loops server and logs", ":serverrun" in bat and "goto serverrun" in bat and "out\\server.log" in bat)
 # a busy port must never turn into a restart loop that stops videos (found when a second server held port 8000)
 serverrun = bat[bat.index(":serverrun" + chr(10)) if (":serverrun" + chr(10)) in bat else bat.index(":serverrun" + chr(13)):bat.rindex(":killvideos")]
 check("start bat waits instead of restarting when port 8000 is taken", "TcpClient" in serverrun and "timeout /t 30" in serverrun)

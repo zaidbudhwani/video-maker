@@ -504,7 +504,9 @@ def run(page, ctx):
     status = page.evaluate("fetch(`/api/jobs/${jobId}`).then(r => r.json())")
     rep = status["report"]
     size = rep["parts"][0].get("size_mb")
-    check("sr: the real report has a file size and the button shows it", size and f"{size:.1f}".split(".")[0] in page.locator("#players .big").first.inner_text(), (size, page.locator("#players .big").first.inner_text()))
+    expected_mb = f"{int(float(size) + 0.5)} MB" if size and float(size) >= 10 else (f"{float(size):.1f} MB" if size else "")
+    check("sr: the real report has a file size and the button shows it", bool(size) and f"({expected_mb})" in page.locator("#players .big").first.inner_text(), (size, expected_mb, page.locator("#players .big").first.inner_text()))
+    check("sr: fileMB rounds >=10 MB and keeps 1 decimal below 10 MB", page.evaluate("[9.94, 9.96, 10.0, 17.4, 17.5, 17.6, 99.4, 99.5, 100.4, 100.5].map(fileMB)") == ["9.9 MB", "10.0 MB", "10 MB", "17 MB", "18 MB", "18 MB", "99 MB", "100 MB", "100 MB", "101 MB"])
     check("sr: the real video has a poster picture that loads", page.evaluate("fetch(document.querySelector('#players video').poster).then(r => r.ok && r.headers.get('content-type'))") == "image/jpeg")
     check("sr: real titles come as 1 open + 2 behind More title ideas", page.locator("#copy .field.title").count() == 3 and page.locator("#copy .field.title:visible").count() == 1)
     check("sr: real platform captions come as 4 tabs", page.locator("#platformTabs .tab").count() == 4)

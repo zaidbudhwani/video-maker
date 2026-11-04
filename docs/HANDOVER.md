@@ -51,7 +51,7 @@ venv\Scripts\python check_setup.py --api    # also tests the Claude key with one
 - `ANTHROPIC_WORKSPACE_ID`: only if the key says "not scoped to a workspace."
 - `CLAUDE_MODEL`: the model name (default `claude-sonnet-5`, in `video_tool/config.py`). When Anthropic retires a model, set this to the new one, run `check_setup.py --api` **and make one real video with the AI on**. **Model-id trap:** `web/interpret.py` retries with `tool_choice` auto if a model refuses a forced tool, but `video_tool/writer.py` (titles and captions, and the film ideas) still forces a specific tool. Some newer models, Sonnet 5.5 among them, can refuse that. The video is still made (plain titles, a note on the page), but the AI copy is lost, and the plain `check_setup.py --api` message would not show it. Until `writer.py` also retries with auto, stay on `claude-sonnet-5` and, after changing the model, make one real video with the AI on. It is listed as retiring no sooner than 2027-06-30: check Anthropic's deprecations page, and make sure the Anthropic account email is an address that will still exist then (the warning email goes there).
 - `APP_PASSWORD`: creates the first `alex` account on a fresh install.
-- Do **not** zip the project folder to hand it over: it would include `.env`, `users.json`, `secret.key` and `zaid-login.txt`.
+- Do **not** zip the project folder to hand it over: it would include `.env`, `users.json`, `secret.key` and `local-login.txt`.
   Use `git archive --format=zip -o alex-tool.zip HEAD` instead (it only includes what is committed).
 
 ## Long video mode (Shorts from a long video)

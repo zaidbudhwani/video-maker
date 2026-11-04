@@ -1,4 +1,4 @@
-"""Content lane browser-side check. The website screens for the new copy fields belong to the web lanes; this part checks
+r"""Content lane browser-side check. The website screens for the new copy fields belong to the web lanes; this part checks
 what the content lane owns and that the site still serves: the signed-in page loads, any finished job in the throwaway
 data folder carries the new copy.json fields, and a post pack builds from a saved demo job and opens as a zip.
 Run alone:  E2E_PORT=8062 E2E_ONLY=content venv\Scripts\python tests\e2e_site.py"""

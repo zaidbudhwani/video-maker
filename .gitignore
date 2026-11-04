@@ -15,6 +15,7 @@ assets/models/
 assets/tools/
 
 users.json
+users.json.*
 secret.key
 users/
 local-login.txt

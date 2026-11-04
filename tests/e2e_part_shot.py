@@ -166,5 +166,75 @@ def run(page, ctx):
     open_job("sh-one")
     p.wait_for_timeout(800)
     check("shot: hidden when there is only one clip", p.locator("#shotCard").is_hidden())
+
+    # Phase 3: clip labels in shot rows, picker, and reorder/remake UI
+    clips_labeled = [
+        {"n": 1, "name": "Front.mov", "label": "front porch"},
+        {"n": 2, "name": "Kitchen.mov", "label": "kitchen <script>alert(1)</script>"},
+        {"n": 3, "name": "Living.mov", "label": ""},
+        {"n": 4, "name": "Deck.mov", "label": "back deck"},
+    ]
+    rows_labeled = [
+        {**rows[0], "label": "front porch"},
+        {**rows[1], "label": "kitchen <script>alert(1)</script>"},
+        {**rows[2], "label": ""},
+        {**rows[3], "label": "back deck"},
+    ]
+    tl_labeled = [
+        {**tl[0], "label": "front porch"},
+        {**tl[1], "label": "kitchen <script>alert(1)</script>"},
+        {**tl[2]},
+        {**tl[3], "label": "back deck"},
+    ]
+    jobs["sh-lbl"] = (report(extra={"timeline": tl_labeled}), clips_labeled)
+    orig_rows = list(rows)
+    rows[:] = rows_labeled
+    open_job("sh-lbl")
+    p.wait_for_selector("#shotCard:not(.hidden)", timeout=10000)
+    mws_lbl = p.locator("#shotList .mw").all_inner_texts()
+    check("shot: clip label shown in shot row and escaped safely", "front porch" in mws_lbl[0] and "<script>" in mws_lbl[1], mws_lbl[:2])
+    p.locator("#didBox summary").click()
+    did_txt = p.locator("#didList").inner_text()
+    check("shot: clip label shown in Which clip is where", "front porch" in did_txt and "back deck" in did_txt, did_txt)
+    p.locator("#shotList > li").nth(2).locator(".change").click()
+    pick_lbl = p.locator("#shotList > li").nth(2).locator(".picker button .pname").all_text_contents()
+    check("shot: picker buttons include clip labels", any("front porch" in x for x in pick_lbl) and any("back deck" in x for x in pick_lbl), pick_lbl)
+    # Check reorderList label input in Not quite right?
+    p.locator("#fbOpen").click()
+    p.locator("#moreOpts summary").click()
+    lbl_inputs = p.locator("#reorderList input.clip-label")
+    check("shot: reorder list has editable clip label inputs", lbl_inputs.count() == 4 and lbl_inputs.nth(0).input_value() == "front porch")
+    lbl_inputs.nth(2).fill("sunny living room")
+    ch_val = p.evaluate("changes()")
+    check("shot: editing a clip label in Remake populates changes().clip_labels",
+          ch_val.get("clip_labels", {}).get("3") == "sunny living room", ch_val)
+    rows[:] = orig_rows
+
+    # Upload screen: clipLabels WeakMap follows exact File across arrow moves and deletions
+    p.goto(BASE + "/")
+    p.wait_for_selector("#drop")
+    c_files = []
+    for nm in ("a.mp4", "b.mp4", "c.mp4"):
+        fp = media / nm
+        fp.write_bytes(vbytes)
+        c_files.append(str(fp))
+    p.set_input_files("#files", c_files)
+    up_inputs = p.locator("#clips input.clip-label")
+    check("upload: each clip row has a 44px+ clip-label input",
+          up_inputs.count() == 3 and p.evaluate("[...document.querySelectorAll('#clips input.clip-label')].every(i => i.getBoundingClientRect().height >= 44)"))
+    up_inputs.nth(0).fill("first room")
+    up_inputs.nth(1).fill("second room")
+    up_inputs.nth(2).fill("third room")
+    # Move clip 1 down -> order becomes [b.mp4, a.mp4, c.mp4]
+    p.locator("#clips li").nth(0).locator("button[aria-label='Move clip 1 down']").click()
+    vals_after_move = [up_inputs.nth(i).input_value() for i in range(3)]
+    check("upload: moving a clip with arrows keeps each label attached to its File",
+          vals_after_move == ["second room", "first room", "third room"], vals_after_move)
+    # Remove the middle clip (a.mp4) -> remaining are [b.mp4, c.mp4]
+    p.locator("#clips li").nth(1).locator("button[aria-label='Remove clip 2']").click()
+    vals_after_del = [up_inputs.nth(i).input_value() for i in range(2)]
+    check("upload: deleting a clip keeps remaining clip labels attached to their Files",
+          vals_after_del == ["second room", "third room"], vals_after_del)
+
     check("shot: no JavaScript errors", not errors, "; ".join(errors[:3]))
     p.close()

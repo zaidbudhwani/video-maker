@@ -45,9 +45,13 @@ DEFAULTS = {
     "music_duck": False,         # opt-in: the music dips a few dB more while she speaks (not yet judged by ear: keep off)
     "orientation": "vertical",   # per-video: vertical (1080x1920 Short, under 60 s) | horizontal (1920x1080 YouTube video, up to 15 min)
     "tall_clips": "bars",        # per-video, horizontal only: bars (upright clips shown whole, plain bars at the sides) | fill (cuts top and bottom)
+    "clip_labels": {},           # per-video optional clip labels: {"1": "kitchen", "3": "back deck"} (1 = her first clip).
+                                 # Untrusted hints for clip matching only; never remembered, never used in copy.
 }
 
 MAX_PINS = 30
+MAX_CLIP_LABEL = 60
+MAX_CLIP_LABELS = 99
 
 ENGINES = ("claude", "qwen", "qwen_video")
 EXPERIMENTAL = ("qwen", "qwen_video")   # other outside providers: NOT approved for her content (only Claude is)
@@ -115,6 +119,72 @@ def merge_pins(old, new):
     return clean_pins(list(old if isinstance(old, list) else []) + list(new if isinstance(new, list) else []))
 
 
+def clean_clip_label(text):
+    """A short plain-text clip label (at most MAX_CLIP_LABEL chars), with control/markup/prompt delimiters stripped."""
+    if not isinstance(text, str):
+        return ""
+    s = "".join(" " if ord(c) < 32 or ord(c) == 127 or c in '<>{}[]\\`"' else c for c in text)
+    return " ".join(s.split())[:MAX_CLIP_LABEL]
+
+
+def clean_clip_labels(value, max_clips=MAX_CLIP_LABELS):
+    """A tidy dict {"1": "kitchen", ...} of 1-based clip numbers to short plain-text labels. Junk is dropped."""
+    out = {}
+    max_n = min(MAX_CLIP_LABELS, max(0, int(max_clips))) if isinstance(max_clips, int) and not isinstance(max_clips, bool) else MAX_CLIP_LABELS
+    if isinstance(value, list):
+        items = [(i + 1, v) for i, v in enumerate(value)]
+    elif isinstance(value, dict):
+        items = list(value.items())
+    else:
+        return {}
+    for k, v in items:
+        if isinstance(k, bool) or not isinstance(v, str):
+            continue
+        try:
+            if isinstance(k, str):
+                if not k.strip().isdigit():
+                    continue
+                n = int(k.strip())
+            elif isinstance(k, int):
+                n = k
+            else:
+                continue
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not 1 <= n <= max_n:
+            continue
+        lbl = clean_clip_label(v)
+        if lbl:
+            out[str(n)] = lbl
+    return dict(sorted(out.items(), key=lambda kv: int(kv[0])))
+
+
+def merge_clip_labels(old, new, max_clips=MAX_CLIP_LABELS):
+    """Merge per-video clip labels across a remake; an empty string in `new` clears that clip's label."""
+    merged = dict(clean_clip_labels(old, max_clips))
+    if isinstance(new, list):
+        items = [(i + 1, v) for i, v in enumerate(new)]
+    elif isinstance(new, dict):
+        items = list(new.items())
+    else:
+        items = []
+    for k, v in items:
+        if isinstance(k, bool) or not isinstance(v, str):
+            continue
+        try:
+            n = int(k.strip()) if isinstance(k, str) and k.strip().isdigit() else int(k) if isinstance(k, int) else 0
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not 1 <= n <= max_clips:
+            continue
+        lbl = clean_clip_label(v)
+        if lbl:
+            merged[str(n)] = lbl
+        else:
+            merged.pop(str(n), None)
+    return clean_clip_labels(merged, max_clips)
+
+
 def clamp(s):
     for k, (lo, hi) in LIMITS.items():
         s[k] = min(hi, max(lo, float(s[k])))
@@ -126,6 +196,7 @@ def clamp(s):
     s["highlights"] = clamp_highlights(s.get("highlights"))
     s["cut_retakes"] = s["cut_retakes"] is not False   # on unless she explicitly keeps both takes
     s["pins"] = clean_pins(s.get("pins"))
+    s["clip_labels"] = clean_clip_labels(s.get("clip_labels"))
     s["hints"] = " ".join(str(s["hints"] or "").split())[:400]
     if s.get("match_engine") not in ENGINES + LOCAL_ENGINES or (s["match_engine"] in EXPERIMENTAL and not other_ai_authorized()):
         s["match_engine"] = "claude"

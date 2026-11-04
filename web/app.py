@@ -869,6 +869,22 @@ def _clean_extras(body):
                 raise HTTPException(400, "The fill-the-screen choice has to be on or off.")
             if tall == "fill":
                 out["tall_clips"] = "fill"
+    labels = body.get("clip_labels")
+    if labels is not None:
+        from video_tool.settings import clean_clip_labels
+        if isinstance(labels, list):
+            if not all(v is None or isinstance(v, str) for v in labels):
+                raise HTTPException(400, "Clip labels need plain text.")
+            cleaned = clean_clip_labels(["" if v is None else v for v in labels])
+        elif isinstance(labels, dict):
+            if not all(isinstance(k, (str, int)) and not isinstance(k, bool) and (v is None or isinstance(v, str))
+                       for k, v in labels.items()):
+                raise HTTPException(400, "Clip labels need plain text.")
+            cleaned = clean_clip_labels({k: ("" if v is None else v) for k, v in labels.items()})
+        else:
+            raise HTTPException(400, "Clip labels need plain text.")
+        if cleaned:
+            out["clip_labels"] = cleaned
     return out
 
 
@@ -1202,6 +1218,17 @@ def _put_in_order(folder, pend):
         tmp[i].replace(folder / slot)
         new_slots.append({**s, "slot": slot})
     pend["slots"] = new_slots + [s for s in pend["slots"] if s["slot"].startswith("voice")]
+    old_labels = (pend.get("extras") or {}).get("clip_labels")
+    if isinstance(old_labels, dict) and old_labels:
+        remapped = {}
+        for pos, i in enumerate(order, 1):
+            lbl = old_labels.get(str(i + 1))
+            if lbl:
+                remapped[str(pos)] = lbl
+        if remapped:
+            pend["extras"]["clip_labels"] = remapped
+        else:
+            pend["extras"].pop("clip_labels", None)
     _save_pending(folder.name, pend)
     (folder / "original_names.json").write_text(json.dumps([s["name"] for s in pend["slots"]], indent=1), encoding="utf-8")
     (folder / "auto_sort.json").write_text(json.dumps({"basis": basis, "moved": moved}, indent=1), encoding="utf-8")
@@ -1242,12 +1269,16 @@ def _clip_names(folder, clips):
 @app.get("/api/jobs/{job_id}/clips")
 def job_clips(job_id: str, request: Request):
     """Her clips by the names she gave them, for the 'change the order' list on the results page."""
+    from video_tool.settings import clean_clip_labels
     _mine(request, job_id)
     src = _read(OUT / f"{job_id}.source")
     if not src or not Path(src).is_dir():
         return {"clips": []}
     clips, _ = _source_files(src)
-    return {"clips": [{"n": i + 1, "name": n} for i, n in enumerate(_clip_names(src, clips))]}
+    labels = clean_clip_labels(_own_settings(job_id).get("clip_labels") or _job_settings(job_id).get("clip_labels"),
+                               max_clips=len(clips))
+    return {"clips": [{"n": i + 1, "name": n, **({"label": labels[str(i + 1)]} if labels.get(str(i + 1)) else {})}
+                      for i, n in enumerate(_clip_names(src, clips))]}
 
 
 def _shot_rows(d, report):
@@ -1270,7 +1301,9 @@ def _shot_rows(d, report):
             return []
         phr = match.phrases(words, float(report.get("length") or tl[-1]["end"]))
         texts, times = [p["text"] for p in phr], [[round(p["start"], 2), round(p["end"], 2)] for p in phr]
+    from video_tool.settings import clean_clip_labels
     fixes = (report.get("settings") or {}).get("caption_fixes") or {}
+    labels = clean_clip_labels((report.get("settings") or {}).get("clip_labels"))
 
     def fixed(t):
         for a, b in fixes.items():
@@ -1296,10 +1329,12 @@ def _shot_rows(d, report):
                 shown_score, best_score = max(shown), best
             except (ValueError, TypeError, IndexError, KeyError):
                 word = None
+        lbl = slot.get("label") or (labels.get(str(n), "") if n else "")
         rows.append({"start": round(t0, 2), "end": round(t1, 2), "text": fixed(str(texts[j]).strip()), "clip": n,
                      "slot_start": slot["start"], "slot_end": slot["end"], "match": word,
                      "shown_score": shown_score, "best_score": best_score,
-                     "pinned": bool(slot.get("pinned"))})
+                     "pinned": bool(slot.get("pinned")),
+                     **({"label": lbl} if lbl else {})})
     return rows
 
 
@@ -1363,6 +1398,13 @@ async def reorder_clips(job_id: str, request: Request):
     if own.get("pins"):   # her "Change this shot" choices follow the clip to its new number
         own["pins"] = [{**p, "clip": order.index(p["clip"]) + 1} for p in own["pins"]
                        if isinstance(p, dict) and p.get("clip") in order]
+    if isinstance(own.get("clip_labels"), dict) and own["clip_labels"]:
+        old_lbl = own["clip_labels"]
+        remapped = {str(pos): old_lbl[str(old_n)] for pos, old_n in enumerate(order, 1) if old_lbl.get(str(old_n))}
+        if remapped:
+            own["clip_labels"] = remapped
+        else:
+            own.pop("clip_labels", None)
     _start(new_id, folder, owner or request.state.user,
            [*(_settings_arg(new_id, own) if own else []), "--reuse", str(OUT / job_id)])
     (OUT / f"{new_id}.parent").write_text(job_id, encoding="utf-8")
@@ -1627,6 +1669,12 @@ async def feedback(job_id: str, request: Request):
         overrides["caption_fixes"] = {**before.get("caption_fixes", {}), **merged.get("caption_fixes", {})}
     if "pins" in merged:   # "Change this shot": her earlier choices stay, a new one replaces one at the same moment
         overrides["pins"] = S.merge_pins(before.get("pins"), merged["pins"])
+    if "clip_labels" in before or "clip_labels" in merged:
+        merged_labels = S.merge_clip_labels(before.get("clip_labels"), merged.get("clip_labels"))
+        if merged_labels:
+            overrides["clip_labels"] = merged_labels
+        else:
+            overrides.pop("clip_labels", None)
     if overrides.get("privacy") == "private":
         overrides["match_clips"] = False   # a private video stays private through every remake
     _start(new_id, Path(src.read_text(encoding="utf-8")), owner or user,

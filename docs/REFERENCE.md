@@ -443,6 +443,8 @@ Order of precedence: built-in defaults, then her remembered `prefs.json` (look-a
 | `match_clips` | true | Voice-over mode: Claude looks at still frames and times each clip to her words. |
 | `auto_order` | true | Move a clip to where she talks about it when the whole plan grades at least 5% better. |
 | `match_twice` | false | Score the clips twice and average. Doubles the matching cost. Only a real `true` turns it on. |
+| `clip_labels` | `{}` | Per video: optional short clip labels (`{"1": "kitchen", "2": "deck"}`, up to 60 characters each). Follows the clip when clips are sorted or reordered, invalidates the match cache when changed, and is passed to clip matching strictly as untrusted data. Never remembered. |
+| `pins` | `[]` | Per video: "Change this shot" choices (`[{"start", "end", "clip"}]`). Never remembered. |
 | `hints` | "" | Per video: names, streets and numbers to listen for. Max 400 characters. They bias the speech-to-text spelling as hotwords and are never repeated back. Not remembered. |
 | `format` | "auto" | `auto`, `house_tour`, `recipe`, `tips`, `market_update`, `qa`. Shapes titles, captions, closing line, hashtags and the "film this" list (`video_tool/formats.py`). Not remembered. |
 | `cut_retakes` | true | Talking mode: when she says a line twice in a row, keep the last take. Each cut is listed in `report.json` `retakes`. |
@@ -456,7 +458,7 @@ Order of precedence: built-in defaults, then her remembered `prefs.json` (look-a
 
 "Use these settings for all my future videos" saves only the look-and-feel keys (`REMEMBER_KEYS`: captions, size, height, pauses,
 fillers, dead start, stabilize, framing, denoise, music). Per-video keys (`hints`, `format`, `cut_retakes`, `start_at_hook`,
-`match_twice`, `match_clips`, `auto_order`, `highlights`) are never saved, so one video's choices cannot leak into the next. The page's
+`match_twice`, `match_clips`, `auto_order`, `highlights`, `pins`, `clip_labels`) are never saved, so one video's choices cannot leak into the next. The page's
 `privacy` override is not in `DEFAULTS`: the server adds it per video next to `match_clips: false`.
 
 ## Files a finished video leaves (`out/<job>/`)
@@ -470,7 +472,7 @@ not needed) and `uncertain_words` (`[{word, at, p, part}]`, least sure first, at
 Voice-over mode adds `not_shown` (`[{at, said, idea}]`, at most 3: said but not shown, worked out from the clip-matching scores
 already saved, no extra AI call). Talking mode adds `original`, `trimmed`, `framing`, `retakes` (`[{at, said, removed_at}]`) and
 `opening` (`{greeting_seconds, said, hook_at, applied}`). Clip fitting adds `clips_total`, `voice`, `cut_from_end` (seconds of
-unused footage), `short_by` (seconds the last frame is held), `timeline`, `clip_match`, `match_warnings`, `steadied`, `moved`,
+unused footage), `short_by` (seconds the last frame is held), `timeline`, `clip_match`, `match_warnings` (including `kind: "cut"` when clip lengths or a pin force a cut mid-sentence), `mid_phrase_cuts` (seconds of cuts that had to land mid-sentence), `pins_applied`, `steadied`, `moved`,
 `skipped_start`. `ai_error` (`{kind, message}`) appears when a Claude step failed (the video was still made). `final` (a disk path)
 is removed before the page sees the report.
 

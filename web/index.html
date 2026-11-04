@@ -87,6 +87,7 @@
   li.clip .sub { display: flex; gap: 8px; font-size: 13px; color: var(--muted); min-width: 0; }
   li.clip .fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   li.clip .dur { flex: none; }
+  .clip-label { display: block; width: 100%; margin-top: 6px; padding: 6px 10px; min-height: 44px; font: 14px var(--sans); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
   .voice { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--clay-soft); }
   .voice svg { color: var(--clay); flex: none; }
   .voice .vtext { flex: 1; min-width: 0; line-height: 1.35; }
@@ -834,6 +835,7 @@ function audioSeconds(file) {
   });
 }
 const clipSecs = new WeakMap();   // file -> seconds, or -1 when the browser couldn't read it
+let clipLabels = new WeakMap();   // file -> optional short label string ("kitchen", "back deck")
 let voiceSecs;                    // undefined while it is being read, null when unknown
 
 let notes = [];
@@ -995,11 +997,17 @@ function render() {
   clips.forEach((f, i) => {
     const li = document.createElement("li");
     li.className = "clip";
+    const lblInput = longMode ? "" : `<input class="clip-label clips-only" type="text" maxlength="60" autocomplete="off" placeholder="Optional label (e.g. kitchen, deck)" aria-label="Label for clip ${i + 1}">`;
     li.innerHTML = `<div class="cthumb" aria-hidden="true">${ICON.vid}</div>
-      <div class="who"><b>${longMode ? esc(f.name) : "Clip " + (i + 1)}</b><div class="sub"><span class="fname">${longMode ? "Your long video" : esc(f.name)}</span><span class="dur"></span></div></div>
+      <div class="who"><b>${longMode ? esc(f.name) : "Clip " + (i + 1)}</b><div class="sub"><span class="fname">${longMode ? "Your long video" : esc(f.name)}</span><span class="dur"></span></div>${lblInput}</div>
       <button class="icon-btn" aria-label="Move clip ${i + 1} up" ${i ? "" : "disabled"}>${ICON.up}</button>
       <button class="icon-btn" aria-label="Move clip ${i + 1} down" ${i < clips.length - 1 ? "" : "disabled"}>${ICON.down}</button>
       <button class="icon-btn" aria-label="Remove clip ${i + 1}">${ICON.x}</button>`;
+    const lblEl = li.querySelector(".clip-label");
+    if (lblEl) {
+      lblEl.value = clipLabels.get(f) || "";
+      lblEl.oninput = () => clipLabels.set(f, lblEl.value);
+    }
     const [up, down, del] = li.querySelectorAll("button");
     thumbFor(f).then(t => {   // what the clip looks like and how long it is: so she can tell clips apart. A plain video icon stays if the browser can't read it
       clipSecs.set(f, t && isFinite(t.seconds) ? t.seconds : -1);
@@ -1139,7 +1147,7 @@ $("voiceFile").onchange = e => {
 };
 $("private").onchange = render;
 function clearAll() {
-  clips = []; notes = []; recMsg = ""; recState = "idle"; setVoice(null);
+  clips = []; clipLabels = new WeakMap(); notes = []; recMsg = ""; recState = "idle"; setVoice(null);
   $("hints").value = ""; $("private").checked = false;
   $("resetAsk").classList.add("hidden"); $("reset").classList.remove("hidden");
   render();
@@ -1264,11 +1272,13 @@ $("go").onclick = async () => {
   uploading = true; keepAwake(true);
   try {
     const file = f => ({ name: f.name, size: f.size });
+    const rawLabels = !longMode ? clips.map(f => (clipLabels.get(f) || "").trim()) : [];
     const start = await postJSON("/api/uploads", {
       clips: clips.map(file), voice: voice && !longMode ? file(voice) : null, denoise: $("denoise").checked, manual_order: manualOrder, music_duck: $("musicDuck").checked,
       hints: $("hints").value.trim() || null, format: longMode ? "auto" : $("kind").value || "auto", private: longMode ? false : $("private").checked,
       highlights: longMode ? shortsCount() : null, music: TRACKS.length ? uploadMusic || "auto" : null,
       orientation: wideVideo() ? "horizontal" : "vertical", tall_clips: wideVideo() && $("tallFill").checked ? "fill" : "bars",
+      clip_labels: rawLabels.some(Boolean) ? rawLabels : null,
     });
     if (!start.ok) return fail(start.json.detail || "I couldn't start the upload. Please try again.");
     const { job_id, slots, chunk } = start.json;
@@ -1440,7 +1450,7 @@ function clipNumber(name) {
 function herName(name) {
   if (/^Clip \d+/.test(name)) return name;
   const n = clipNumber(name), c = n && clipNames.find(x => x.n === n);
-  return c ? `Clip ${n} (${c.name})` : n ? `Clip ${n}` : name;
+  return c ? `Clip ${n} (${c.name}${c.label ? " · " + c.label : ""})` : n ? `Clip ${n}` : name;
 }
 
 function finish(id, r) {
@@ -1992,24 +2002,37 @@ function changes() {
   if (pick.track !== undefined) { c.music_track = pick.track; if (!fbReport || !fbReport.music) c.music_on = true; }
   const f = fixes();
   if (Object.keys(f).length) c.caption_fixes = f;
+  const lbls = changedLabels();
+  if (Object.keys(lbls).length) c.clip_labels = lbls;
   return c;
 }
 function updateSummary() {
   if (!$("plan").classList.contains("hidden")) closePlan();   // she changed something: the preview is out of date
   const list = Object.entries(pick).filter(([, v]) => v !== undefined).map(([k, v]) => NAMES[k](isNaN(+v) || v === "" ? v : +v));
   const f = Object.entries(fixes()).map(([a, b]) => `"${a}" → "${b}"`);
-  const all = [...list, ...f];
+  const l = Object.entries(changedLabels()).map(([n, v]) => v ? `Clip ${n}: ${v}` : `Clip ${n} label cleared`);
+  const all = [...list, ...f, ...l];
   $("summary").textContent = all.length ? "Will change: " + all.join(", ") : "";
   $("remake").disabled = !all.length && !$("comment").value.trim();
 }
 const canSave = !!(navigator.canShare && (() => { try { return navigator.canShare({ files: [new File(["x"], "x.mp4", { type: "video/mp4" })] }); } catch (_) { return false; } })());
-let order = [], clipNames = [], thumbs = {};
+let order = [], clipNames = [], thumbs = {}, labelEdits = {};
 async function fillReorder(id) {
   let list = [];
   try { list = (await (await fetch(`/api/jobs/${id}/clips`)).json()).clips || []; } catch (_) {}
-  clipNames = list; order = list.map(c => c.n); thumbs = {};
+  clipNames = list; order = list.map(c => c.n); thumbs = {}; labelEdits = {};
+  list.forEach(c => { labelEdits[c.n] = c.label || ""; });
   $("orderGroup").classList.toggle("hidden", list.length < 2 || !!(R && R.hl));
   drawReorder();
+  updateSummary();
+}
+function changedLabels() {
+  const out = {};
+  clipNames.forEach(c => {
+    const was = (c.label || "").trim(), now = (labelEdits[c.n] || "").trim();
+    if (now !== was) out[String(c.n)] = now;
+  });
+  return out;
 }
 // A small picture for each clip, taken from the finished video at the moment that clip starts. Only done when she opens More options.
 let thumbsFor = null;
@@ -2061,11 +2084,12 @@ async function drawShots(id) {
     const li = document.createElement("li");
     const nm = clipNames.find(c => c.n === row.clip);
     const mw = MATCH_WORDS[row.match];
+    const lblText = row.label || (nm && nm.label) || "";
     const clipText = row.clip ? `Clip ${row.clip}${nm ? " (" + nm.name + ")" : ""}` : "";
     li.innerHTML = `<button class="shot" type="button">${row.clip ? thumbBox(row.clip) : ""}<b>${mmss(row.start)}</b><span class="words"><span class="said"></span><span class="mw${mw ? " " + mw[1] : ""}"></span></span></button>
       <button class="tab change" type="button" aria-expanded="false">Change this shot</button><div class="pick hidden"></div>`;
     li.querySelector(".said").textContent = `"${row.text}"`;
-    li.querySelector(".mw").textContent = [clipText, mw ? mw[0] : "", row.pinned ? "your choice" : ""].filter(Boolean).join(" · ");
+    li.querySelector(".mw").textContent = [clipText, lblText, mw ? mw[0] : "", row.pinned ? "your choice" : ""].filter(Boolean).join(" · ");
     li.querySelector(".shot").setAttribute("aria-label", `Watch ${mmss(row.start)}: ${row.text}`);
     li.querySelector(".shot").onclick = () => seekTo(row.start);
     li.querySelector(".change").onclick = () => openPicker(li, row);
@@ -2088,8 +2112,8 @@ function openPicker(li, row) {
   const ul = box.querySelector(".picker"), go = box.querySelector(".go");
   others.forEach(c => {
     const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.dataset.n = c.n;
-    b.innerHTML = `${thumbBox(c.n)}<span></span>`;
-    b.querySelector("span").textContent = `Clip ${c.n} (${c.name})`;
+    b.innerHTML = `${thumbBox(c.n)}<span class="pname"></span>`;
+    b.querySelector(".pname").textContent = `Clip ${c.n} (${c.name}${c.label ? " · " + c.label : ""})`;
     b.onclick = () => { chosen = c.n; ul.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); go.disabled = false; };
     const item = document.createElement("li"); item.appendChild(b); ul.appendChild(item);
   });
@@ -2110,9 +2134,12 @@ function drawReorder() {
   order.forEach((n, i) => {
     const li = document.createElement("li");
     const nm = clipNames.find(c => c.n === n);
-    li.innerHTML = `<b>${i + 1}</b>${thumbs[n] ? `<img class="cthumb" alt="" src="${thumbs[n]}">` : `<span class="cthumb" aria-hidden="true">${ICON.vid}</span>`}<span class="rname">${esc(nm ? nm.name : "Clip " + n)}</span>
+    li.innerHTML = `<b>${i + 1}</b>${thumbs[n] ? `<img class="cthumb" alt="" src="${thumbs[n]}">` : `<span class="cthumb" aria-hidden="true">${ICON.vid}</span>`}<div class="rname"><div>${esc(nm ? nm.name : "Clip " + n)}</div><input class="clip-label" type="text" maxlength="60" autocomplete="off" placeholder="Optional label (e.g. kitchen, deck)" aria-label="Label for clip ${n}"></div>
       <button class="icon-btn" aria-label="Move up" ${i ? "" : "disabled"}>${ICON.up}</button>
       <button class="icon-btn" aria-label="Move down" ${i < order.length - 1 ? "" : "disabled"}>${ICON.down}</button>`;
+    const inp = li.querySelector(".clip-label");
+    inp.value = labelEdits[n] || "";
+    inp.oninput = () => { labelEdits[n] = inp.value; updateSummary(); };
     const [up, down] = li.querySelectorAll("button");
     up.onclick = () => { [order[i - 1], order[i]] = [order[i], order[i - 1]]; drawReorder(); };
     down.onclick = () => { [order[i + 1], order[i]] = [order[i], order[i + 1]]; drawReorder(); };

@@ -372,7 +372,7 @@ def t_run_on():
     check("text without full stops is not 'punctuated'", doc.punctuated is False)
     ms = H.pick_moments(words, t, 2, key=False)
     invariants("run-on text still gives legal moments", words, ms, 2)
-    full = Doc_ok = H.Doc(words_from(["This is a sentence with a few words in it right now."] * 20))
+    full = H.Doc(words_from(["This is a sentence with a few words in it right now."] * 20))
     check("normal text is 'punctuated'", full.punctuated is True)
 
 

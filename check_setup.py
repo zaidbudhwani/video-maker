@@ -71,7 +71,7 @@ def main(api=False):
 
     try:
         from video_tool.config import FFMPEG, FFPROBE, DEEP_FILTER, MUSIC_DIR, WHISPER_MODEL
-    except SystemExit as e:
+    except SystemExit:
         say("bad", "ffmpeg isn't installed", "Install it once:  winget install Gyan.FFmpeg   (then open a new window)")
         return
     from video_tool import config

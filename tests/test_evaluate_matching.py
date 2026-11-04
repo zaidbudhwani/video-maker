@@ -1,4 +1,4 @@
-"""The evaluation runner (tests/evaluate_matching.py) and the answer-key page (tests/answer_key_tool.py).
+r"""The evaluation runner (tests/evaluate_matching.py) and the answer-key page (tests/answer_key_tool.py).
 Run: venv\Scripts\python tests\test_evaluate_matching.py
 Synthetic jobs and keys whose numbers are worked out by hand below; no footage, no AI, nothing leaves this computer."""
 import json
@@ -254,8 +254,9 @@ try:
         check("saved tour through the new runner: Claude 81.7% when supported, 47.7% across all, coverage 58.4%",
               near(lf["finished"]["acc_supported"], .817, .001) and near(lf["finished"]["acc_all"], .477, .001)
               and near(lf["finished"]["coverage"], .584, .001), lf.get("finished"))
-        check("saved tour: her own order 24.3% / 14.2%, contradictions 34.5% / 20.2%", near(lf["her_order"]["acc_supported"], .243, .001)
-              and near(lf["her_order"]["acc_all"], .142, .001) and near(lf["her_order"]["contradict_supported"], .345, .001)
+        # Phase 3 moved her-order cuts to phrase pauses: 24.3% / 14.2% before it (5608fc6), 25.9% / 15.1% after
+        check("saved tour: her own order 25.9% / 15.1%, contradictions 34.5% / 20.2%", near(lf["her_order"]["acc_supported"], .259, .001)
+              and near(lf["her_order"]["acc_all"], .151, .001) and near(lf["her_order"]["contradict_supported"], .345, .001)
               and near(lf["her_order"]["contradict_all"], .202, .001), lf.get("her_order"))
     else:
         print("SKIP the saved-tour check: out/engine-A-claude, samples/tour or the old answer key is not here")

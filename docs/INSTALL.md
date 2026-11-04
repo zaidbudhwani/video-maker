@@ -116,9 +116,11 @@ version and re-checks the install. Her settings, accounts and videos are kept.
 Tested: **Get Video Maker.bat** run from nothing on the laptop it was built on. It downloaded the project
 from GitHub, installed packages, models and settings, and passed the checker; a second run updated cleanly;
 and a freshly installed copy made a real video. The GitHub sign-in step itself was not exercised, because
-that laptop was already signed in. **Not tested:** a computer that has never had Python or ffmpeg, an
-older or slower computer, or any computer other than the maintainer's. Do the first real install on a teammate's
-Windows laptop before the broker's.
+that laptop was already signed in.
+
+**Second computer (Nov 2026):** another Windows computer was set up by an AI agent following AGENTS.md from this
+repository, and it worked. Not recorded: whether that computer already had Python or ffmpeg, the checker's output, and
+whether an API key was used. **Still not tested:** an older or slower computer.
 
 Also **not tested** on any computer but the maintainer's: the Docker image (never built), iPhone and Android browsers (including recording a
 voice-over in the browser on an iPhone), a Mac, and the real 150 MB upload from a phone through the tunnel. See REFERENCE.md "What was tested, and what was not".

@@ -1,4 +1,4 @@
-"""When a render times out, EVERYTHING it started is stopped before the next video begins.
+r"""When a render times out, EVERYTHING it started is stopped before the next video begins.
 
 Run: venv\Scripts\python tests\test_process_tree.py
 The website runs the pipeline as one subprocess and the pipeline starts ffmpeg. subprocess.run(timeout=...) only killed the

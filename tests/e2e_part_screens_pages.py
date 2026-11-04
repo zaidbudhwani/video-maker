@@ -73,10 +73,17 @@ def _run(page, ctx, out, made):
     # ---- My videos: the list comes first, one row per video, numbers tucked away ----
     page.goto(BASE + "/videos")
     page.wait_for_selector(".row")
-    page.wait_for_function("[...document.querySelectorAll('img.thumb')].every(i => i.complete)", timeout=30000)
+    for job in ("scr-a2", "scr-p1"):
+        page.locator(f'.row[data-job="{job}"] img.thumb').scroll_into_view_if_needed()
+    page.wait_for_function("['scr-a2', 'scr-p1'].every(j => { const i = document.querySelector(`.row[data-job='${j}'] img.thumb`); return i && i.complete && i.naturalWidth > 0; })", timeout=30000)
     titles = page.locator(".row .title").all_inner_texts()
     check("My videos: newest version only by default", titles.count("Seed Alpha tour") == 1 and "Seed Parts talk" in titles, titles)
     check("My videos: admin sees only their own by default (Only mine)", "Second person video" not in titles, titles)
+    key = page.locator("#statusKey")
+    check("My videos: a key explains Draft, Reviewed and Posted, and says nothing is posted for her",
+          key.is_visible() and all(w in key.inner_text() for w in ("Draft", "Reviewed", "Posted", "nothing is posted for you")), key.inner_text())
+    check("My videos: a title stops at two lines and keeps its full text as a tooltip",
+          page.evaluate("(() => { const t = document.querySelector('.row .title'); return getComputedStyle(t).webkitLineClamp === '2' && t.title === t.textContent; })()"))
     check("My videos: the numbers are tucked away under 'Your numbers'",
           not page.locator("#sTotal").is_visible() and page.locator("#numbersFold summary").inner_text() == "Your numbers")
     fams = len({v["first_version"] for v in api.get(f"{BASE}/api/videos").json()["videos"] if v["owner"] == "tester"})
@@ -152,10 +159,14 @@ def _run(page, ctx, out, made):
     check("Delete: removing a video removes every version of it", api.get(f"{BASE}/api/jobs/scr-a1").status == 404 and api.get(f"{BASE}/api/jobs/scr-a2").status == 404)
 
     # ---- six or more videos: search and sort appear ----
-    for i in range(6):
+    for i in range(10):
         seed(f"scr-m{i}", "tester", f"Many {i}", minutes_ago=30 + i)
     page.goto(BASE + "/videos")
     page.wait_for_selector(".row")
+    for job in ("scr-m0", "scr-m9"):
+        page.locator(f'.row[data-job="{job}"] img.thumb').scroll_into_view_if_needed()
+    page.wait_for_function("['scr-m0', 'scr-m9'].every(j => { const i = document.querySelector(`.row[data-job='${j}'] img.thumb`); return i && i.complete && i.naturalWidth > 0; })", timeout=30000)
+    check("My videos: offscreen lazy thumbnails load when scrolled into view", True)
     check("My videos: search and sort appear with 6 or more videos", page.locator("#tools").is_visible())
     page.fill("#q", "Many 3")
     check("My videos: search finds a title", page.locator(".row .title").all_inner_texts() == ["Many 3"])

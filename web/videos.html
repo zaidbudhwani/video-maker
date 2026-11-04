@@ -65,7 +65,7 @@
   .row.older { margin-left: 18px; background: var(--bg2); }
   .main { display: grid; grid-template-columns: 56px 1fr; gap: 12px; }
   .thumb { width: 56px; height: 100px; border-radius: 8px; background: var(--bg2); object-fit: cover; display: block; }
-  .title { font-weight: 600; font-size: 16px; margin: 0 0 2px; overflow-wrap: anywhere; }
+  .title { font-weight: 600; font-size: 16px; margin: 0 0 2px; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
   .meta { font-size: 13px; color: var(--muted); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .chip { font-size: 12px; border-radius: 99px; padding: 2px 9px; background: var(--accent-soft); color: var(--accent); font-weight: 500; }
@@ -168,6 +168,7 @@
     <select id="owner" aria-label="Whose videos"></select>
   </div>
 
+  <p class="meta hidden" id="statusKey" style="margin:0 0 8px"><b>Draft</b>: not checked yet. <b>Reviewed</b>: you've checked it. <b>Posted</b>: you've said where you posted it. This is only your own record; nothing is posted for you.</p>
   <div class="list" id="list"><div class="empty">Loading…</div></div>
   <div><button class="toggle hidden" id="older" type="button">Show earlier versions</button></div>
 
@@ -335,7 +336,7 @@ function rowHtml(r, older) {
     <div class="main">
       ${done ? `<img class="thumb" loading="lazy" alt="" src="/api/jobs/${r.job_id}/thumb.jpg" onerror="this.style.visibility='hidden'">` : `<div class="thumb"></div>`}
       <div>
-        <p class="title">${esc(r.title || "Untitled video")}</p>
+        <p class="title" title="${esc(r.title || "Untitled video")}">${esc(r.title || "Untitled video")}</p>
         <div class="meta">${r.made_at ? when(r.made_at) : ""}${done ? " · " + mmss(r.length) + (r.parts > 1 ? " each" : "") : ""}${admin && r.owner ? " · " + esc(r.owner) : ""}</div>
         <div class="chips">${chips.join("")}</div>
       </div>
@@ -362,6 +363,7 @@ function render() {
   if (sort === "old") fams = fams.reverse();
   if (sort === "long") fams.sort((a, b) => (b[0].length || 0) * (b[0].parts || 1) - (a[0].length || 0) * (a[0].parts || 1));
   $("tools").classList.toggle("hidden", families(all).length < 6);   // nothing to sort or search until there are a few
+  $("statusKey").classList.toggle("hidden", !all.some(r => r.status === "done"));   // the key only makes sense next to a finished video
   $("older").classList.toggle("hidden", !all.some(r => r.versions > 1));
   $("older").textContent = showOlder ? "Hide earlier versions" : "Show earlier versions";
   if (!fams.length) {

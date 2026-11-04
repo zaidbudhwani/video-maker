@@ -1,4 +1,4 @@
-"""The clip-matching accuracy figures keep four things apart: coverage, accuracy when supported, accuracy across all narration,
+r"""The clip-matching accuracy figures keep four things apart: coverage, accuracy when supported, accuracy across all narration,
 and contradictions. Run: venv\Scripts\python tests\test_matching_accuracy.py
 Synthetic phrases, clips and key (no footage, no AI): this checks the DEFINITIONS in tests/matching_accuracy_report.py, and
 that on the real saved tour (when present) the four figures are consistent with each other."""

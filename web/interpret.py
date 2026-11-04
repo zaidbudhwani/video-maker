@@ -105,6 +105,19 @@ def clean_values(changes):
             ok = isinstance(v, bool)
         elif isinstance(want, (int, float)):
             ok = isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+        elif k == "clip_labels":
+            if isinstance(v, dict):
+                raw_clear = {str(int(str(ck).strip())): "" for ck, cv in v.items()
+                             if not isinstance(ck, bool) and str(ck).strip().isdigit()
+                             and 1 <= int(str(ck).strip()) <= S.MAX_CLIP_LABELS and cv == ""}
+                cleaned = S.clean_clip_labels(v)
+                v = {**raw_clear, **cleaned}
+                ok = bool(v)
+            elif isinstance(v, list):
+                v = S.clean_clip_labels(v)
+                ok = bool(v)
+            else:
+                ok = False
         elif isinstance(want, dict):
             ok = isinstance(v, dict)
         elif k == "pins":   # "Change this shot": tidy list of {start, end, clip}; junk entries are dropped
@@ -507,6 +520,7 @@ LABELS = {
     "format": lambda v: f"kind of video: {FORMAT_NAMES.get(v, v)}",
     "hints": lambda v: f"names to listen for: {v}" if v else "no names to listen for",
     "pins": lambda v: "; ".join(f"Clip {p['clip']} at {int(p['start'] // 60)}:{int(p['start'] % 60):02d}" for p in v),
+    "clip_labels": lambda v: "; ".join(f"Clip {k}: {lbl}" if lbl else f"Clip {k} label cleared" for k, lbl in sorted(v.items(), key=lambda kv: int(kv[0]))),
 }
 
 

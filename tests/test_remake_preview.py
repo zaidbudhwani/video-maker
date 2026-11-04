@@ -17,7 +17,7 @@ DATA = Path(tempfile.mkdtemp(prefix="alex-preview-"))
 os.environ.update(ALEX_DATA_DIR=str(DATA), ALEX_HOSTED="1", ADMIN_USER="tester", ADMIN_PASSWORD="admin-pass-123",
                   ANTHROPIC_API_KEY="", OPENROUTER_API_KEY="", APP_PASSWORD="", ALEX_AUTO_SLIM="0")
 
-from video_tool import settings as S   # noqa: E402
+from video_tool import music, settings as S   # noqa: E402
 from web import interpret as I   # noqa: E402
 
 FAILS = []
@@ -158,7 +158,10 @@ check("answering the question: no second question, and her answer is planned", j
 I._client = lambda: None
 
 j = preview("use a different song").json()
-check("'a different song': pointed to the music choice, not 'can't'", j["cant"] == [] and j["guide"] == [W.MUSIC_GUIDE] and j["will"] == [], j)
+if music.tracks():
+    check("'a different song': pointed to the music choice, not 'can't'", j["cant"] == [] and j["guide"] == [W.MUSIC_GUIDE] and j["will"] == [], j)
+else:   # no tracks copied onto this computer: there is nothing to choose, so it says so plainly
+    check("'a different song' with no tracks installed: said plainly it can't", j["cant"] == ["Use a different song"] and j["will"] == [], j)
 W.jobs[JID] = {"status": "running"}
 r = preview("make the captions bigger")
 check("a video still being made: no preview", r.status_code == 409, r.status_code)
