@@ -4,8 +4,12 @@
 
 Video Maker takes a folder of phone clips (and an optional voice-over) and builds a finished vertical video: clips matched to
 the words, burned-in captions, three title ideas and a caption for each of YouTube Shorts, TikTok, Instagram Reels and
-Facebook Reels. It can also cut Shorts from one long talking video and write the YouTube post for it. A small website lets
-the person upload from a phone, review, ask for a small change in plain words, and save the result.
+Facebook Reels. A small website lets the person upload from a phone, review, ask for a small change in plain words, and save
+the result. Three kinds of video:
+
+- **Short vertical video** (under 60 s) for TikTok, Instagram Reels, Facebook Reels and YouTube Shorts, with a caption for each.
+- **Horizontal YouTube video** (1920x1080, up to 15 minutes) with titles, a description and captions.
+- **Shorts from a long video:** 1 to 5 vertical Shorts cut from one long talking video, plus its YouTube title, description and chapters.
 
 Nothing posts automatically. The tool never emails or texts anyone. Style stays raw: her footage, her voice, plain captions,
 natural cuts, no effects, transitions, zooms or generated footage.
